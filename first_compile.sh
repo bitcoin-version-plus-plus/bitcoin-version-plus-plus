@@ -19,7 +19,8 @@ sudo apt-get -y install libminiupnpc-dev
 sudo apt-get -y install wmctrl
 
 ./autogen.sh
-./configure --with-miniupnpc --with-incompatible-bdb
+#./configure --enable-debug --disable-dependency-tracking --with-incompatible-bdb
+./configure --disable-dependency-tracking --with-incompatible-bdb
 
 make -j$(nproc)
 ./run.sh

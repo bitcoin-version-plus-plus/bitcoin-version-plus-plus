@@ -136,6 +136,7 @@ const CLogCategoryDesc LogCategories[] =
 {
     {BCLog::NONE, "0"},
     {BCLog::NONE, "none"},
+    {BCLog::HANDSHAKE_PROOF, "handshakeproof"}, // Cybersecurity lab
     {BCLog::NET, "net"},
     {BCLog::TOR, "tor"},
     {BCLog::MEMPOOL, "mempool"},

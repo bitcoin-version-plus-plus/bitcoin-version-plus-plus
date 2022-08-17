@@ -1,8 +1,13 @@
-using namespace std;
+
 
 #include <filesystem>
 #include <string>
+#include <vector>
 #include <iostream>
+#include <regex>
+
+using namespace std;
+namespace fs = std::filesystem;
 
 class MerkleTree {
 public:
@@ -26,13 +31,25 @@ public:
 
 };
 
+vector<string> getFiles(string directory) {
+	vector<string> files;
+
+	for(fs::recursive_directory_iterator i(".."), end; i != end; ++i) 
+		if(!is_directory(i->path()))
+			//string file=
+			if(regex_match())
+			//cout << i->path().filename() << "\n";
+			files.push_back(i->path());
+
+	return files;
+}
+
 int main() {
 	cout << "Hello world" << endl;
-	
-	std::filesystem::path cwd = std::filesystem::current_path() / "filename.txt";
-	std::ofstream file(cwd.string());
-	file.close();
-	cout << buffer << endl;
+
+	vector<string> files = getFiles("..");
+	for(int i = 0; i < files.size(); i++)
+		cout << files[i] << endl;
 
 	MerkleTree tree;
 	return 0;

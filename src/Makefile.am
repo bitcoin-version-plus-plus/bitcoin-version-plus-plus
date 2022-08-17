@@ -601,6 +601,7 @@ libbitcoin_util_a_SOURCES = \
   compat/glibcxx_sanity.cpp \
   compat/strnlen.cpp \
   fs.cpp \
+  handshake_proof.cpp \
   interfaces/echo.cpp \
   interfaces/handler.cpp \
   interfaces/init.cpp \

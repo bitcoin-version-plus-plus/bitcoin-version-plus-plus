@@ -1,7 +1,7 @@
 #!/bin/bash
 # ./run.sh
 # ./run.sh gui
-# ./run.sh gui -debug=researcher
+# ./run.sh gui -debug=handshakeproof
 
 params=""
 if [[ $1 == -* ]] ; then
@@ -104,36 +104,36 @@ if [ "$1" == "gui" ] ; then
 	if [ "$pruned" == "true" ] ; then
 		echo "Pruned mode activated, only keeping 550 block transactions"
 		echo
-		src/qt/bitcoin-qt -prune=550 -datadir="$dir" $params #-debug=researcher
+		src/qt/bitcoin-qt -prune=550 -datadir="$dir" $params #-debug=handshakeproof
 	else
 		echo
-		src/qt/bitcoin-qt -datadir="$dir" $params #-debug=researcher
+		src/qt/bitcoin-qt -datadir="$dir" $params #-debug=handshakeproof
 	fi
 else
 
 	# Only open the console if not already open
-	if ! wmctrl -l | grep -q "Custom Bitcoin Console" ; then
+	if ! wmctrl -l | grep -q "Custom Bitcoin Verack++ Console" ; then
 		# Find the right terminal
 		if [ -x "$(command -v mate-terminal)" ] ; then
-			mate-terminal -t "Custom Bitcoin Console" -- python3 bitcoin_console.py
+			mate-terminal -t "Custom Bitcoin Verack++ Console" -- python3 bitcoin_console.py
 		elif [ -x "$(command -v xfce4-terminal)" ] ; then
-			xfce4-terminal -t "Custom Bitcoin Console" -- python3 bitcoin_console.py
+			xfce4-terminal -t "Custom Bitcoin Verack++ Console" -- python3 bitcoin_console.py
 		else
-			gnome-terminal -t "Custom Bitcoin Console" -- python3 bitcoin_console.py
+			gnome-terminal -t "Custom Bitcoin Verack++ Console" -- python3 bitcoin_console.py
 		fi
 	fi
 
 	if [ "$pruned" == "true" ] ; then
 		echo "Pruned mode activated, only keeping 550 block transactions"
 		echo
-		src/bitcoind -prune=550 -datadir="$dir" $params #-debug=researcher
+		src/bitcoind -prune=550 -datadir="$dir" $params -debug=handshakeproof #-reindex-chainstate
 	else
 		echo
-		src/bitcoind -datadir="$dir" -txindex=1 $params #-debug=researcher
+		src/bitcoind -datadir="$dir" -txindex=1 $params -debug=handshakeproof
 		# Reindexing the chainstate:
-		#src/bitcoind -datadir="/media/sf_Bitcoin" -debug=researcher -reindex-chainstate
+		#src/bitcoind -datadir="/media/sf_Bitcoin" -debug=handshakeproof -reindex-chainstate
 		
 		# Reindexing the transaction index database
-		#src/bitcoind -datadir="$dir" -txindex=1 -reindex $params #-debug=researcher
+		#src/bitcoind -datadir="$dir" -txindex=1 -reindex $params -debug=handshakeproof
 	fi
 fi

@@ -40,6 +40,8 @@
 #include <thread>
 #include <vector>
 
+//#include <handshake_proof.cpp>
+
 class AddrMan;
 class BanMan;
 class CNode;
@@ -761,6 +763,7 @@ protected:
 class CConnman
 {
 public:
+    //HandshakeProof handshakeProof{0}; // Cybersecurity Lab
 
     struct Options
     {

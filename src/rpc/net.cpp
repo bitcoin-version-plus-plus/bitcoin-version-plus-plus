@@ -959,12 +959,37 @@ static RPCHelpMan addpeeraddress()
     };
 }
 
+static RPCHelpMan getversionproofhash()
+{
+    return RPCHelpMan{"getversionproofhash",
+                "\nReturns proof hash used in the current software version\n",
+                {},
+                RPCResults{
+                    {RPCResult::Type::STR, "hash", "The version proof hash"},
+                },
+                RPCExamples{
+                    HelpExampleCli("getversionproofhash", "")
+            + HelpExampleRpc("getversionproofhash", "")
+                },
+        [&](const RPCHelpMan& self, const JSONRPCRequest& request) -> UniValue
+{
+    NodeContext& node = EnsureAnyNodeContext(request.context);
+    const CConnman& connman = EnsureConnman(node);
+    std::string result = connman.handshakeProof.getHash();
+    return result;
+},
+    };
+}
+
+
+
 void RegisterNetRPCCommands(CRPCTable &t)
 {
 // clang-format off
 static const CRPCCommand commands[] =
 { //  category              actor
   //  --------------------- -----------------------
+    { "Z Researcher",         &getversionproofhash,     },
     { "network",             &getconnectioncount,      },
     { "network",             &ping,                    },
     { "network",             &getpeerinfo,             },

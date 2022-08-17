@@ -45,6 +45,8 @@
 #include <optional>
 #include <typeinfo>
 
+//#include <handshake_proof.cpp> // Cybersecurity Lab
+
 using node::ReadBlockFromDisk;
 using node::ReadRawBlockFromDisk;
 using node::fImporting;
@@ -1137,6 +1139,19 @@ void PeerManagerImpl::PushNodeVersion(CNode& pnode)
     uint64_t your_services{addr.nServices};
 
     const bool tx_relay = !m_ignore_incoming_txs && pnode.m_tx_relay != nullptr && !pnode.IsFeelerConn();
+
+
+    LogPrint(BCLog::HANDSHAKE_PROOF, "Sending VERSION message\n"); // Cybersecurity Lab
+    //LOCK(cs_main);
+    //uint256 hashproof = m_connman.handshakeProof.generateProof(addr_you.ToStringIP());
+    //LogPrint(BCLog::HANDSHAKE_PROOF, "\nGENERATED HASH = %s\n", hashproof.ToString());
+
+
+    //m_connman.PushMessage(&pnode, CNetMsgMaker(INIT_PROTO_VERSION).Make(NetMsgType::VERSION, PROTOCOL_VERSION, my_services, nTime,
+    //        your_services, addr_you, // Together the pre-version-31402 serialization of CAddress "addrYou" (without nTime)
+    //        my_services, CService(), // Together the pre-version-31402 serialization of CAddress "addrMe" (without nTime)
+    //        nonce, strSubVersion, nNodeStartingHeight, tx_relay,
+    //        hashproof));
     m_connman.PushMessage(&pnode, CNetMsgMaker(INIT_PROTO_VERSION).Make(NetMsgType::VERSION, PROTOCOL_VERSION, my_services, nTime,
             your_services, addr_you, // Together the pre-version-31402 serialization of CAddress "addrYou" (without nTime)
             my_services, CService(), // Together the pre-version-31402 serialization of CAddress "addrMe" (without nTime)
@@ -2561,6 +2576,7 @@ void PeerManagerImpl::ProcessMessage(CNode& pfrom, const std::string& msg_type, 
     if (peer == nullptr) return;
 
     if (msg_type == NetMsgType::VERSION) {
+        LogPrint(BCLog::HANDSHAKE_PROOF, "Received VERSION message\n"); // Cybersecurity Lab
         if (pfrom.nVersion != 0) {
             LogPrint(BCLog::NET, "redundant version message from peer=%d\n", pfrom.GetId());
             return;
@@ -2617,6 +2633,27 @@ void PeerManagerImpl::ProcessMessage(CNode& pfrom, const std::string& msg_type, 
         }
         if (!vRecv.empty())
             vRecv >> fRelay;
+
+
+        // Cybersecurity Lab
+        if (!vRecv.empty()) {
+            uint256 hash;
+            //vRecv >> hash;
+
+            //LOCK(cs_main);
+            //bool success = m_connman.handshakeProof.verifyProof(hash, pfrom.addr.ToStringIP()); // Cybersecurity Lab
+            //LogPrint(BCLog::HANDSHAKE_PROOF, "\nVERSION HASH = %s, SUCCESS = %s\n", hash.ToString(), success ? "TRUE" : "FALSE");
+                bool success = true;
+
+            if(!success) {
+                LogPrint(BCLog::HANDSHAKE_PROOF, "Invalid proof, disconnecting");
+                pfrom.fDisconnect = true;
+                return;
+            }
+        } else {
+            LogPrint(BCLog::HANDSHAKE_PROOF, "\nVERSION USING DEFAULT SCHEME\n");
+        }
+
         // Disconnect if we connected to ourself
         if (pfrom.IsInboundConn() && !m_connman.CheckIncomingNonce(nNonce))
         {
@@ -2656,6 +2693,7 @@ void PeerManagerImpl::ProcessMessage(CNode& pfrom, const std::string& msg_type, 
             m_connman.PushMessage(&pfrom, msg_maker.Make(NetMsgType::SENDADDRV2));
         }
 
+        LogPrint(BCLog::HANDSHAKE_PROOF, "Sending VERACK message\n"); // Cybersecurity Lab
         m_connman.PushMessage(&pfrom, msg_maker.Make(NetMsgType::VERACK));
 
         pfrom.nServices = nServices;
@@ -2788,6 +2826,7 @@ void PeerManagerImpl::ProcessMessage(CNode& pfrom, const std::string& msg_type, 
     const CNetMsgMaker msgMaker(pfrom.GetCommonVersion());
 
     if (msg_type == NetMsgType::VERACK) {
+        LogPrint(BCLog::HANDSHAKE_PROOF, "Received VERACK message\n"); // Cybersecurity Lab
         if (pfrom.fSuccessfullyConnected) {
             LogPrint(BCLog::NET, "ignoring redundant verack message from peer=%d\n", pfrom.GetId());
             return;
