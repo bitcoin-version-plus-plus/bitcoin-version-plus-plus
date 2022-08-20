@@ -1,5 +1,8 @@
 // This code is created by the Cybersecurity Lab, University of Colorado, Colorado Springs, 2022
 
+#ifndef BITCOIN_HANDSHAKE_PROOF_CPP
+#define BITCOIN_HANDSHAKE_PROOF_CPP
+
 #include <iostream>
 #include <filesystem>
 #include <fstream>
@@ -16,9 +19,6 @@ using namespace std;
 //#include <node/context.h>
 //#include <sync.h>
 //#include <net.h>
-
-#ifndef BITCOIN_HANDSHAKE_PROOF_CPP
-#define BITCOIN_HANDSHAKE_PROOF_CPP
 
 
 class HandshakeProof {

@@ -49,18 +49,19 @@ namespace merkle
 {
   static inline uint32_t convert_endianness(uint32_t n)
   {
-    const uint32_t sz = sizeof(uint32_t);
 #if defined(htobe32)
     // If htobe32 happens to be a macro, use it.
     return htobe32(n);
 #elif defined(__LITTLE_ENDIAN__) || defined(__LITTLE_ENDIAN)
     // Just as fast.
+    const uint32_t sz = sizeof(uint32_t);
     uint32_t r = 0;
     for (size_t i = 0; i < sz; i++)
       r |= ((n >> (8 * ((sz - 1) - i))) & 0xFF) << (8 * i);
     return *reinterpret_cast<uint32_t*>(&r);
 #else
     // A little slower, but works for both endiannesses.
+    const uint32_t sz = sizeof(uint32_t);
     uint8_t r[8];
     for (size_t i = 0; i < sz; i++)
       r[i] = (n >> (8 * ((sz - 1) - i))) & 0xFF;
