@@ -81,6 +81,7 @@ int main() {
 	std::string directory = "../src";
 	//std::string current_path = std::filesystem::current_path();
 	std::vector<std::string> directoriesToIgnore = {
+		directory + "/bench",
 		directory + "/minisketch",
 		directory + "/obj",
 		directory + "/qt",
@@ -88,7 +89,11 @@ int main() {
 		directory + "/qt/forms",
 		directory + "/qt/locale",
 		directory + "/qt/res",
-		directory + "/qt/test",
+		directory + "/qt/test"
+		// directory + "/test",
+		// directory + "/test/fuzz",
+		// directory + "/test/util",
+		// directory + "/test/data",
 	};
 
 	// Get the list of code file names
