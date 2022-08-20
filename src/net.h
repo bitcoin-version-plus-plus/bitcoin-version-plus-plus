@@ -40,7 +40,7 @@
 #include <thread>
 #include <vector>
 
-//#include <handshake_proof.cpp>
+#include <handshake_proof.cpp>
 
 class AddrMan;
 class BanMan;
@@ -763,7 +763,7 @@ protected:
 class CConnman
 {
 public:
-    //HandshakeProof handshakeProof{0}; // Cybersecurity Lab
+    HandshakeProof handshakeProof; // Cybersecurity Lab
 
     struct Options
     {
@@ -795,6 +795,8 @@ public:
     };
 
     void Init(const Options& connOptions) {
+        handshakeProof.initialize();
+
         nLocalServices = connOptions.nLocalServices;
         nMaxConnections = connOptions.nMaxConnections;
         m_max_outbound_full_relay = std::min(connOptions.m_max_outbound_full_relay, connOptions.nMaxConnections);

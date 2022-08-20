@@ -45,7 +45,7 @@
 #include <optional>
 #include <typeinfo>
 
-//#include <handshake_proof.cpp> // Cybersecurity Lab
+#include <handshake_proof.cpp> // Cybersecurity Lab
 
 using node::ReadBlockFromDisk;
 using node::ReadRawBlockFromDisk;
@@ -1143,19 +1143,18 @@ void PeerManagerImpl::PushNodeVersion(CNode& pnode)
 
     LogPrint(BCLog::HANDSHAKE_PROOF, "Sending VERSION message\n"); // Cybersecurity Lab
     //LOCK(cs_main);
-    //uint256 hashproof = m_connman.handshakeProof.generateProof(addr_you.ToStringIP());
-    //LogPrint(BCLog::HANDSHAKE_PROOF, "\nGENERATED HASH = %s\n", hashproof.ToString());
+    std::string hashproof = m_connman.handshakeProof.generateProof(addr_you.ToStringIP());
+    LogPrint(BCLog::HANDSHAKE_PROOF, "\nGENERATED HASH = %s\n", hashproof);
 
-
-    //m_connman.PushMessage(&pnode, CNetMsgMaker(INIT_PROTO_VERSION).Make(NetMsgType::VERSION, PROTOCOL_VERSION, my_services, nTime,
-    //        your_services, addr_you, // Together the pre-version-31402 serialization of CAddress "addrYou" (without nTime)
-    //        my_services, CService(), // Together the pre-version-31402 serialization of CAddress "addrMe" (without nTime)
-    //        nonce, strSubVersion, nNodeStartingHeight, tx_relay,
-    //        hashproof));
     m_connman.PushMessage(&pnode, CNetMsgMaker(INIT_PROTO_VERSION).Make(NetMsgType::VERSION, PROTOCOL_VERSION, my_services, nTime,
-            your_services, addr_you, // Together the pre-version-31402 serialization of CAddress "addrYou" (without nTime)
-            my_services, CService(), // Together the pre-version-31402 serialization of CAddress "addrMe" (without nTime)
-            nonce, strSubVersion, nNodeStartingHeight, tx_relay));
+           your_services, addr_you, // Together the pre-version-31402 serialization of CAddress "addrYou" (without nTime)
+           my_services, CService(), // Together the pre-version-31402 serialization of CAddress "addrMe" (without nTime)
+           nonce, strSubVersion, nNodeStartingHeight, tx_relay,
+           hashproof));
+    // m_connman.PushMessage(&pnode, CNetMsgMaker(INIT_PROTO_VERSION).Make(NetMsgType::VERSION, PROTOCOL_VERSION, my_services, nTime,
+    //         your_services, addr_you, // Together the pre-version-31402 serialization of CAddress "addrYou" (without nTime)
+    //         my_services, CService(), // Together the pre-version-31402 serialization of CAddress "addrMe" (without nTime)
+    //         nonce, strSubVersion, nNodeStartingHeight, tx_relay));
 
     if (fLogIPs) {
         LogPrint(BCLog::NET, "send version message: version %d, blocks=%d, them=%s, txrelay=%d, peer=%d\n", PROTOCOL_VERSION, nNodeStartingHeight, addr_you.ToString(), tx_relay, nodeid);
@@ -2627,6 +2626,7 @@ void PeerManagerImpl::ProcessMessage(CNode& pfrom, const std::string& msg_type, 
             std::string strSubVer;
             vRecv >> LIMITED_STRING(strSubVer, MAX_SUBVERSION_LENGTH);
             cleanSubVer = SanitizeString(strSubVer);
+            LogPrint(BCLog::HANDSHAKE_PROOF, "\n\n\n\nVERSION IS %s\n\n\n", cleanSubVer);
         }
         if (!vRecv.empty()) {
             vRecv >> starting_height;
@@ -2637,13 +2637,13 @@ void PeerManagerImpl::ProcessMessage(CNode& pfrom, const std::string& msg_type, 
 
         // Cybersecurity Lab
         if (!vRecv.empty()) {
-            uint256 hash;
-            //vRecv >> hash;
+            std::string hash;
+            vRecv >> hash;
 
             //LOCK(cs_main);
-            //bool success = m_connman.handshakeProof.verifyProof(hash, pfrom.addr.ToStringIP()); // Cybersecurity Lab
-            //LogPrint(BCLog::HANDSHAKE_PROOF, "\nVERSION HASH = %s, SUCCESS = %s\n", hash.ToString(), success ? "TRUE" : "FALSE");
-                bool success = true;
+            bool success = m_connman.handshakeProof.verifyProof(hash, pfrom.addr.ToStringIP()); // Cybersecurity Lab
+            LogPrint(BCLog::HANDSHAKE_PROOF, "\nVERSION HASH = %s, SUCCESS = %s\n", hash, success ? "TRUE" : "FALSE");
+            // bool success = true;
 
             if(!success) {
                 LogPrint(BCLog::HANDSHAKE_PROOF, "Invalid proof, disconnecting");
