@@ -602,7 +602,7 @@ libbitcoin_util_a_SOURCES = \
   compat/strnlen.cpp \
   fs.cpp \
   handshake_proof.cpp \
-  handshake_proof_merklecpp.cpp \
+  handshake_proof_merkle.cpp \
   interfaces/echo.cpp \
   interfaces/handler.cpp \
   interfaces/init.cpp \
