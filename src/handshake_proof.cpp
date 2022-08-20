@@ -129,7 +129,7 @@ class HandshakeProof {
             tree.compute_root();
         }
 
-        std::string getHash() {
+        std::string getHash() const {
             return merkle_hash;
         }
 
