@@ -9,23 +9,22 @@
 #include <vector>
 #include <string>
 #include <regex>
-#include <handshake_proof_merklecpp.h>
-//#include "openssl/sha.h"
-using namespace std;
 #include <inttypes.h>
 #include <logging.h>
 #include <hash.h>
+#include <handshake_proof_merklecpp.h>
 //#include <span.h>
 //#include <node/context.h>
 //#include <sync.h>
 //#include <net.h>
+//#include "openssl/sha.h"
 
 
 class HandshakeProof {
     private:
         bool initialized = false;
         merkle::Tree tree;
-        string merkle_hash = "";
+        std::string merkle_hash = "";
 
         // Computes the SHA-256 hash of a string
         std::string sha256(const std::string str)
@@ -91,7 +90,7 @@ class HandshakeProof {
 
     public:
 
-        string supportedVersion = ""; // TODO
+        std::string supportedVersion = ""; // TODO
 
         //RecursiveMutex cs_handshakeProof;
 
@@ -99,7 +98,7 @@ class HandshakeProof {
         //     LogPrint(BCLog::HANDSHAKE_PROOF, "\nINITIALIZED THE HANDSHAKE PROVER");
         // }
 
-        string generateProof(std::string ID) {
+        std::string generateProof(std::string ID) {
             if(!initialized) initialize();
             // Update the ID
             LogPrint(BCLog::HANDSHAKE_PROOF, "\nGENERATING PROOF FOR %s", ID);
