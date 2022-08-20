@@ -34,27 +34,23 @@ class HandshakeProof {
             return hash.ToString();
         }
 
-        // Recursively list the files in a directory
-        std::vector<std::string> getFiles(std::string directory, std::string regexStr, bool ignore_current_directory = true) {
-            std::string current_path = std::filesystem::current_path();
+        // The function used to sort the vector of file names
+        static bool pathCompareFunction (std::string a, std::string b) {
+            return a < b;
+        }
 
+        // Recursively list the files in a directory
+        std::vector<std::string> getFiles(std::string directory, std::string regexToIncludeStr, std::string regexToIgnoreStr) {
             std::vector<std::string> files;
             for(std::filesystem::recursive_directory_iterator i(directory), end; i != end; ++i) {
                 if(!is_directory(i->path())) {
                     std::string str = i->path();
-                    if(std::regex_match(str, std::regex(regexStr))) {
-
-                        if(ignore_current_directory) {
-                            std::string parent = str.substr(0, str.find_last_of("/\\"));
-                            if(std::filesystem::equivalent(parent, current_path)) {
-                                continue;
-                            }
-                        }
-
+                    if(std::regex_match(str, std::regex(regexToIncludeStr)) && !std::regex_match(str, std::regex(regexToIgnoreStr))) {
                         files.push_back(str);
                     }
                 }
             }
+            std::sort(files.begin(),files.end(), pathCompareFunction);
             return files;
         }
 
@@ -89,7 +85,7 @@ class HandshakeProof {
         // }
 
         bool isVersionSupported(std::string version) const {
-            for(int i = 0; i < supportedVersions.size(); i++) {
+            for(int i = 0; i < (int)supportedVersions.size(); i++) {
                 if(version == supportedVersions.at(i)) return true;
             }
             return false;
@@ -134,7 +130,12 @@ class HandshakeProof {
             LogPrint(BCLog::HANDSHAKE_PROOF, "\nINITIALIZING HANDSHAKE PROVER");
 
             // Get the list of code file names
-            std::vector<std::string> files = getFiles("../src", ".*(\\.cpp|\\.c|\\.h|\\.cc|\\.py|\\.sh)", false);
+            std::string directory = "../src";
+            std::string regexToIncludeStr = ".*(\\.cpp|\\.c|\\.h|\\.cc|\\.py|\\.sh)";
+            std::string regexToIgnoreStr = ".*(/build-aux/|/config/|-config.h|/minisketch/|/obj/|/qt/|/univalue/gen/|/zqm/).*";
+
+            // Get the list of code file names
+            std::vector<std::string> files = getFiles("../src", regexToIncludeStr, regexToIgnoreStr);
             std::vector<std::string> hashes ((int)files.size());
             // Compute the hash of the files
             for(int i = 0; i < (int)files.size(); i++) {
