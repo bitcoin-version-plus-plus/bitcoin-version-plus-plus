@@ -80,7 +80,7 @@ void updateHashAtIndex(merkle::Tree &tree, int index, std::string hash_string) {
 int main() {
 	std::string directory = "../src";
 	std::string regexToIncludeStr = ".*(\\.cpp|\\.c|\\.h|\\.cc|\\.py|\\.sh)";
-	std::string regexToIgnoreStr = ".*(/minisketch/|/obj/|/qt/|/univalue/gen/).*";
+	std::string regexToIgnoreStr = ".*(/build-aux/|/config/|/minisketch/|/obj/|/qt/|/univalue/gen/).*";
 
 	// Get the list of code file names
 	std::vector<std::string> files = getFiles("../src", regexToIncludeStr, regexToIgnoreStr);
@@ -123,8 +123,8 @@ int main() {
 	// Update the ID
 	updateHashAtIndex(tree, 0, "0000000000000000000000000000000000000000000000000000000000000000");
 
-	if(tree.root().to_string() == "721b70434f32fd73c8cd5045ed66aca8fb43fb94ca82e077603a73e9808bd15b") {
-		std::cout << "Correct version" << std::endl;
+	if(tree.root().to_string() == "25dd59669c93d16176332b35b6b687f702d28852d657261e2413dfaf7396d13a") {
+		std::cout << "Correct version!" << std::endl;
 	} else {
 		std::cout << "Incorrect version: " << tree.root().to_string() << std::endl;
 	}
