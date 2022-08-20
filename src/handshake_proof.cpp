@@ -23,7 +23,7 @@
 class HandshakeProof {
     private:
         bool initialized = false;
-        merkle::Tree tree;
+        merkle_proof::Tree tree;
         std::string merkle_hash = "";
 
         // Computes the SHA-256 hash of a string
@@ -111,12 +111,12 @@ class HandshakeProof {
         }
 
         // Update the hash at an index within the tree
-        void updateHashAtIndex(merkle::Tree &tree, int index, std::string hash_string) {
-            merkle::TreeT<32, merkle::sha256_compress>::Node* ID = tree.walk_to(index, true, [](merkle::TreeT<32, merkle::sha256_compress>::Node* n, bool go_right) {
+        void updateHashAtIndex(merkle_proof::Tree &tree, int index, std::string hash_string) {
+            merkle_proof::TreeT<32, merkle_proof::sha256_compress>::Node* ID = tree.walk_to(index, true, [](merkle_proof::TreeT<32, merkle_proof::sha256_compress>::Node* n, bool go_right) {
                 n->dirty = true;
                 return true;
             });
-            merkle::Tree::Hash newHash(hash_string);
+            merkle_proof::Tree::Hash newHash(hash_string);
             ID->hash = newHash;
             tree.compute_root();
         }
@@ -157,9 +157,9 @@ class HandshakeProof {
             // }
 
             // Convert the hashes to Merkle node objects
-            std::vector<merkle::Tree::Hash> leaves ((int)hashes.size());
+            std::vector<merkle_proof::Tree::Hash> leaves ((int)hashes.size());
             for(int i = 0; i < (int)hashes.size(); i++) {
-                merkle::Tree::Hash hash(hashes.at(i));
+                merkle_proof::Tree::Hash hash(hashes.at(i));
                 leaves.at(i) = hash;
             }
 
