@@ -35,10 +35,11 @@ std::vector<std::string> getFiles(std::string directory, std::string regexStr, s
 				std::string parent = str.substr(0, str.find_last_of("/\\"));
 				for(int i = 0; i < directoriesToIgnore.size(); i++) {
 					if(std::filesystem::equivalent(parent, directoriesToIgnore.at(i))) {
-						std::cout << "IGNORING \"" << str << "\"" << std::endl;
+						//std::cout << "Ignoring \"" << str << "\"" << std::endl;
 						continue;
 					}
 				}
+				std::cout << "Including \"" << str << "\"" << std::endl;
 
 				files.push_back(str);
 			}
