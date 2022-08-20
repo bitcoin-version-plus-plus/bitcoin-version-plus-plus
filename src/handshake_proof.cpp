@@ -89,20 +89,9 @@ class HandshakeProof {
             return (int)pow(2, ceil(n));
         }
 
-        // Update the hash at an index within the tree
-        void updateHashAtIndex(merkle::Tree &tree, int index, std::string hash_string) {
-            merkle::TreeT<32, merkle::sha256_compress>::Node* ID = tree.walk_to(index, true, [](merkle::TreeT<32, merkle::sha256_compress>::Node* n, bool go_right) {
-                n->dirty = true;
-                return true;
-            });
-            merkle::Tree::Hash newHash(hash_string);
-            ID->hash = newHash;
-            tree.compute_root();
-        }
-
     public:
 
-        string supportedVersion = "";
+        string supportedVersion = ""; // TODO
 
         //RecursiveMutex cs_handshakeProof;
 
@@ -129,8 +118,24 @@ class HandshakeProof {
             // }
         }
 
+        // Update the hash at an index within the tree
+        void updateHashAtIndex(merkle::Tree &tree, int index, std::string hash_string) {
+            merkle::TreeT<32, merkle::sha256_compress>::Node* ID = tree.walk_to(index, true, [](merkle::TreeT<32, merkle::sha256_compress>::Node* n, bool go_right) {
+                n->dirty = true;
+                return true;
+            });
+            merkle::Tree::Hash newHash(hash_string);
+            ID->hash = newHash;
+            tree.compute_root();
+        }
+
+        std::string getHash() {
+            return merkle_hash;
+        }
+
         void initialize() {
             if(initialized) return;
+            LogPrint(BCLog::HANDSHAKE_PROOF, "\nINITIALIZING HANDSHAKE PROVER");
 
             // Get the list of code file names
             std::vector<std::string> files = getFiles("..", ".*(\\.cpp|\\.c|\\.h|\\.cc|\\.py|\\.sh)", true);
