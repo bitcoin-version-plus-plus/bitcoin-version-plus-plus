@@ -42,9 +42,9 @@ std::vector<std::string> getFiles(std::string directory, std::string regexToIncl
 	}
 	std::cout << "Sorting files..." << std::endl;
 	std::sort(files.begin(),files.end(), pathCompareFunction);
-	for(int i = 0; i < files.size(); i++) {
-		std::cout << "Including \"" << files.at(i) << "\"" << std::endl;
-	}
+	// for(int i = 0; i < files.size(); i++) {
+	// 	std::cout << "Including \"" << files.at(i) << "\"" << std::endl;
+	// }
 	return files;
 }
 
@@ -87,7 +87,9 @@ int main() {
 	std::vector<std::string> hashes (files.size());
 	// Compute the hash of the files
 	for(int i = 0; i < files.size(); i++) {
-		hashes.at(i) = sha256(getContents(files[i]));
+		hashes.at(i) = sha256(getContents(files.at(i)));
+
+	 	std::cout << "File \"" << files.at(i) << "\" has has \"" << hashes.at(i) << "\"" << std::endl;
 	}
 	// Set the initial ID
 	hashes.insert(hashes.begin(), "0000000000000000000000000000000000000000000000000000000000000000");
