@@ -12,7 +12,7 @@
 #include <inttypes.h>
 #include <logging.h>
 #include <hash.h>
-#include <handshake_proof_merklecpp.h>
+#include <handshake_proof_merklecpp.cpp>
 //#include <span.h>
 //#include <node/context.h>
 //#include <sync.h>
