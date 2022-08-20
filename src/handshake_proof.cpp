@@ -6,8 +6,8 @@
 #include <vector>
 #include <string>
 #include <regex>
-#include "handshake_proof_merklecpp.h"
-#include "openssl/sha.h"
+#include <handshake_proof_merklecpp.h>
+//#include "openssl/sha.h"
 using namespace std;
 #include <inttypes.h>
 #include <logging.h>
