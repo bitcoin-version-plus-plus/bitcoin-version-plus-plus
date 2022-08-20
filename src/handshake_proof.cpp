@@ -74,7 +74,7 @@ class HandshakeProof {
 
     public:
 
-        std::vector<std::string> supportedVersions = {
+        std::vector<std::string> const supportedVersions = {
             "/Satoshi:23.0.0/"
         };
 
@@ -86,6 +86,7 @@ class HandshakeProof {
 
         bool isVersionSupported(std::string version) const {
             for(int i = 0; i < (int)supportedVersions.size(); i++) {
+                LogPrint(BCLog::HANDSHAKE_PROOF, "\nCHECKING VERSION %s == %s --> %s", version, supportedVersions.at(i), version == supportedVersions.at(i));
                 if(version == supportedVersions.at(i)) return true;
             }
             return false;
