@@ -2640,12 +2640,13 @@ void PeerManagerImpl::ProcessMessage(CNode& pfrom, const std::string& msg_type, 
         // Cybersecurity Lab
         if (m_connman.handshakeProof.isVersionSupported(cleanSubVer) && !vRecv.empty()) {
             pfrom.isUsingHandshakeProof = true;
-
-            std::string hash;
-            vRecv >> hash;
+            
+            std::string strHash, cleanHash;
+            vRecv >> strHash;
+            cleanHash = SanitizeString(strHash);
 
             //LOCK(cs_main);
-            bool success = m_connman.handshakeProof.verifyProof(hash, pfrom.addr.ToStringIP()); // Cybersecurity Lab
+            bool success = m_connman.handshakeProof.verifyProof(cleanHash, pfrom.addr.ToStringIP()); // Cybersecurity Lab
             LogPrint(BCLog::HANDSHAKE_PROOF, "\nVERSION HASH = %s, SUCCESS = %s\n", hash, success ? "TRUE" : "FALSE");
             // bool success = true;
 
