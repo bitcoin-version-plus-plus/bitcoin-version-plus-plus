@@ -1,11 +1,12 @@
-#include <iostream>
-#include <filesystem>
-#include <fstream>
-#include <vector>
-#include <string>
-#include <regex>
 #include "handshake_proof_merklecpp.h"
 #include "openssl/sha.h"
+#include <algorithm>
+#include <filesystem>
+#include <fstream>
+#include <iostream>
+#include <regex>
+#include <string>
+#include <vector>
 
 // Computes the SHA-256 hash of a string
 std::string sha256(const std::string str)
@@ -23,27 +24,26 @@ std::string sha256(const std::string str)
     return ss.str();
 }
 
+// The function used to sort the vector of file names
+bool pathCompareFunction (std::string a, std::string b) {
+	return a < b;
+}
+
 // Recursively list the files in a directory
 std::vector<std::string> getFiles(std::string directory, std::string regexToIncludeStr, std::string regexToIgnoreStr) {
-
 	std::vector<std::string> files;
 	for(std::filesystem::recursive_directory_iterator i(directory), end; i != end; ++i) {
 		if(!is_directory(i->path())) {
 			std::string str = i->path();
 			if(std::regex_match(str, std::regex(regexToIncludeStr)) && !std::regex_match(str, std::regex(regexToIgnoreStr))) {
-
-				// std::string parent = str.substr(0, str.find_last_of("/\\"));
-				// for(int i = 0; i < directoriesToIgnore.size(); i++) {
-				// 	if(std::filesystem::equivalent(parent, directoriesToIgnore.at(i))) {
-				// 		//std::cout << "Ignoring \"" << str << "\"" << std::endl;
-				// 		continue;
-				// 	}
-				// }
-				std::cout << "Including \"" << str << "\"" << std::endl;
-
 				files.push_back(str);
 			}
 		}
+	}
+	std::cout << "Sorting files..." << std::endl;
+	std::sort(files.begin(),files.end(), pathCompareFunction);
+	for(int i = 0; i < files.size(); i++) {
+		std::cout << "Including \"" << files.at(i) << "\"" << std::endl;
 	}
 	return files;
 }
