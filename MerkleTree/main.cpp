@@ -80,7 +80,7 @@ void updateHashAtIndex(merkle::Tree &tree, int index, std::string hash_string) {
 int main() {
 	std::string directory = "../src";
 	std::string regexToIncludeStr = ".*(\\.cpp|\\.c|\\.h|\\.cc|\\.py|\\.sh)";
-	std::string regexToIgnoreStr = ".*(/bench/|/minisketch/|/obj/|/qt/).*";
+	std::string regexToIgnoreStr = ".*(/minisketch/|/obj/|/qt/|/univalue/gen/).*";
 
 	// Get the list of code file names
 	std::vector<std::string> files = getFiles("../src", regexToIncludeStr, regexToIgnoreStr);
