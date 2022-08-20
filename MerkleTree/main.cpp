@@ -24,21 +24,21 @@ std::string sha256(const std::string str)
 }
 
 // Recursively list the files in a directory
-std::vector<std::string> getFiles(std::string directory, std::string regexStr, std::vector<std::string> directoriesToIgnore) {
+std::vector<std::string> getFiles(std::string directory, std::string regexToIncludeStr, std::string regexToIgnoreStr) {
 
 	std::vector<std::string> files;
 	for(std::filesystem::recursive_directory_iterator i(directory), end; i != end; ++i) {
 		if(!is_directory(i->path())) {
 			std::string str = i->path();
-			if(std::regex_match(str, std::regex(regexStr))) {
+			if(std::regex_match(str, std::regex(regexToIncludeStr)) && !std::regex_match(str, std::regex(regexToIgnoreStr))) {
 
-				std::string parent = str.substr(0, str.find_last_of("/\\"));
-				for(int i = 0; i < directoriesToIgnore.size(); i++) {
-					if(std::filesystem::equivalent(parent, directoriesToIgnore.at(i))) {
-						//std::cout << "Ignoring \"" << str << "\"" << std::endl;
-						continue;
-					}
-				}
+				// std::string parent = str.substr(0, str.find_last_of("/\\"));
+				// for(int i = 0; i < directoriesToIgnore.size(); i++) {
+				// 	if(std::filesystem::equivalent(parent, directoriesToIgnore.at(i))) {
+				// 		//std::cout << "Ignoring \"" << str << "\"" << std::endl;
+				// 		continue;
+				// 	}
+				// }
 				std::cout << "Including \"" << str << "\"" << std::endl;
 
 				files.push_back(str);
@@ -79,25 +79,11 @@ void updateHashAtIndex(merkle::Tree &tree, int index, std::string hash_string) {
 
 int main() {
 	std::string directory = "../src";
-	//std::string current_path = std::filesystem::current_path();
-	std::vector<std::string> directoriesToIgnore = {
-		directory + "/bench",
-		directory + "/minisketch",
-		directory + "/obj",
-		directory + "/qt",
-		directory + "/qt/android",
-		directory + "/qt/forms",
-		directory + "/qt/locale",
-		directory + "/qt/res",
-		directory + "/qt/test"
-		// directory + "/test",
-		// directory + "/test/fuzz",
-		// directory + "/test/util",
-		// directory + "/test/data",
-	};
+	std::string regexToIncludeStr = ".*(\\.cpp|\\.c|\\.h|\\.cc|\\.py|\\.sh)";
+	std::string regexToIgnoreStr = ".*(/bench/|/minisketch/|/obj/|/qt/).*";
 
 	// Get the list of code file names
-	std::vector<std::string> files = getFiles("../src", ".*(\\.cpp|\\.c|\\.h|\\.cc|\\.py|\\.sh)", directoriesToIgnore);
+	std::vector<std::string> files = getFiles("../src", regexToIncludeStr, regexToIgnoreStr);
 	std::vector<std::string> hashes (files.size());
 	// Compute the hash of the files
 	for(int i = 0; i < files.size(); i++) {
