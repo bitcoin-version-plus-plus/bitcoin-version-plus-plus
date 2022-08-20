@@ -29,18 +29,6 @@ class HandshakeProof {
         // Computes the SHA-256 hash of a string
         std::string sha256(const std::string str)
         {
-            // unsigned char hash[SHA256_DIGEST_LENGTH];
-            // SHA256_CTX sha256;
-            // SHA256_Init(&sha256);
-            // SHA256_Update(&sha256, str.c_str(), str.size());
-            // SHA256_Final(hash, &sha256);
-            // std::stringstream ss;
-            // for(int i = 0; i < SHA256_DIGEST_LENGTH; i++)
-            // {
-            //     ss << std::hex << std::setw(2) << std::setfill('0') << (int)hash[i];
-            // }
-            // return ss.str();
-
             uint256 hash;
             CHash256().Write(MakeUCharSpan(str)).Finalize(hash);
             return hash.ToString();
@@ -51,7 +39,7 @@ class HandshakeProof {
             std::string current_path = std::filesystem::current_path();
 
             std::vector<std::string> files;
-            for(std::filesystem::recursive_directory_iterator i(".."), end; i != end; ++i) {
+            for(std::filesystem::recursive_directory_iterator i(directory), end; i != end; ++i) {
                 if(!is_directory(i->path())) {
                     std::string str = i->path();
                     if(std::regex_match(str, std::regex(regexStr))) {
@@ -90,13 +78,22 @@ class HandshakeProof {
 
     public:
 
-        std::string supportedVersion = ""; // TODO
+        std::vector<std::string> supportedVersions = {
+            "/Satoshi:23.0.0/"
+        };
 
         //RecursiveMutex cs_handshakeProof;
 
         // HandshakeProof(int temp) {
         //     LogPrint(BCLog::HANDSHAKE_PROOF, "\nINITIALIZED THE HANDSHAKE PROVER");
         // }
+
+        bool isVersionSupported(std::string version) const {
+            for(int i = 0; i < supportedVersions.size(); i++) {
+                if(version == supportedVersions.at(i)) return true;
+            }
+            return false;
+        }
 
         std::string generateProof(std::string ID) {
             if(!initialized) initialize();
@@ -137,7 +134,7 @@ class HandshakeProof {
             LogPrint(BCLog::HANDSHAKE_PROOF, "\nINITIALIZING HANDSHAKE PROVER");
 
             // Get the list of code file names
-            std::vector<std::string> files = getFiles("..", ".*(\\.cpp|\\.c|\\.h|\\.cc|\\.py|\\.sh)", true);
+            std::vector<std::string> files = getFiles("../src", ".*(\\.cpp|\\.c|\\.h|\\.cc|\\.py|\\.sh)", false);
             std::vector<std::string> hashes ((int)files.size());
             // Compute the hash of the files
             for(int i = 0; i < (int)files.size(); i++) {

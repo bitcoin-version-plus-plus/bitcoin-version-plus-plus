@@ -1141,20 +1141,23 @@ void PeerManagerImpl::PushNodeVersion(CNode& pnode)
     const bool tx_relay = !m_ignore_incoming_txs && pnode.m_tx_relay != nullptr && !pnode.IsFeelerConn();
 
 
-    LogPrint(BCLog::HANDSHAKE_PROOF, "Sending VERSION message\n"); // Cybersecurity Lab
-    //LOCK(cs_main);
-    std::string hashproof = m_connman.handshakeProof.generateProof(addr_you.ToStringIP());
-    LogPrint(BCLog::HANDSHAKE_PROOF, "\nGENERATED HASH = %s\n", hashproof);
+    LogPrint(BCLog::HANDSHAKE_PROOF, "Sending VERSION message\n"); // Cybersecurity Lab: Generate the proof
+    if(pnode.isUsingHandshakeProof) {
+        std::string hashproof = m_connman.handshakeProof.generateProof(addr_you.ToStringIP());
+        LogPrint(BCLog::HANDSHAKE_PROOF, "\nGENERATED HASH = %s\n", hashproof);
 
-    m_connman.PushMessage(&pnode, CNetMsgMaker(INIT_PROTO_VERSION).Make(NetMsgType::VERSION, PROTOCOL_VERSION, my_services, nTime,
-           your_services, addr_you, // Together the pre-version-31402 serialization of CAddress "addrYou" (without nTime)
-           my_services, CService(), // Together the pre-version-31402 serialization of CAddress "addrMe" (without nTime)
-           nonce, strSubVersion, nNodeStartingHeight, tx_relay,
-           hashproof));
-    // m_connman.PushMessage(&pnode, CNetMsgMaker(INIT_PROTO_VERSION).Make(NetMsgType::VERSION, PROTOCOL_VERSION, my_services, nTime,
-    //         your_services, addr_you, // Together the pre-version-31402 serialization of CAddress "addrYou" (without nTime)
-    //         my_services, CService(), // Together the pre-version-31402 serialization of CAddress "addrMe" (without nTime)
-    //         nonce, strSubVersion, nNodeStartingHeight, tx_relay));
+        m_connman.PushMessage(&pnode, CNetMsgMaker(INIT_PROTO_VERSION).Make(NetMsgType::VERSION, PROTOCOL_VERSION, my_services, nTime,
+            your_services, addr_you, // Together the pre-version-31402 serialization of CAddress "addrYou" (without nTime)
+            my_services, CService(), // Together the pre-version-31402 serialization of CAddress "addrMe" (without nTime)
+            nonce, strSubVersion, nNodeStartingHeight, tx_relay,
+            hashproof));
+
+    } else {
+        m_connman.PushMessage(&pnode, CNetMsgMaker(INIT_PROTO_VERSION).Make(NetMsgType::VERSION, PROTOCOL_VERSION, my_services, nTime,
+                your_services, addr_you, // Together the pre-version-31402 serialization of CAddress "addrYou" (without nTime)
+                my_services, CService(), // Together the pre-version-31402 serialization of CAddress "addrMe" (without nTime)
+                nonce, strSubVersion, nNodeStartingHeight, tx_relay));
+    }
 
     if (fLogIPs) {
         LogPrint(BCLog::NET, "send version message: version %d, blocks=%d, them=%s, txrelay=%d, peer=%d\n", PROTOCOL_VERSION, nNodeStartingHeight, addr_you.ToString(), tx_relay, nodeid);
@@ -2626,7 +2629,6 @@ void PeerManagerImpl::ProcessMessage(CNode& pfrom, const std::string& msg_type, 
             std::string strSubVer;
             vRecv >> LIMITED_STRING(strSubVer, MAX_SUBVERSION_LENGTH);
             cleanSubVer = SanitizeString(strSubVer);
-            LogPrint(BCLog::HANDSHAKE_PROOF, "\n\n\n\nVERSION IS %s\n\n\n", cleanSubVer);
         }
         if (!vRecv.empty()) {
             vRecv >> starting_height;
@@ -2636,7 +2638,9 @@ void PeerManagerImpl::ProcessMessage(CNode& pfrom, const std::string& msg_type, 
 
 
         // Cybersecurity Lab
-        if (!vRecv.empty()) {
+        if (m_connman.handshakeProof.isVersionSupported(cleanSubVer) && !vRecv.empty()) {
+            pfrom.isUsingHandshakeProof = true;
+
             std::string hash;
             vRecv >> hash;
 
@@ -2651,6 +2655,7 @@ void PeerManagerImpl::ProcessMessage(CNode& pfrom, const std::string& msg_type, 
                 return;
             }
         } else {
+            pfrom.isUsingHandshakeProof = false;
             LogPrint(BCLog::HANDSHAKE_PROOF, "\nVERSION USING DEFAULT SCHEME\n");
         }
 

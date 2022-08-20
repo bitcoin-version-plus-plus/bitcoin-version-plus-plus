@@ -481,6 +481,9 @@ public:
     std::atomic_bool fPauseRecv{false};
     std::atomic_bool fPauseSend{false};
 
+    // Cybersecurity Lab
+    bool isUsingHandshakeProof = true;
+
     bool IsOutboundOrBlockRelayConn() const {
         switch (m_conn_type) {
             case ConnectionType::OUTBOUND_FULL_RELAY:

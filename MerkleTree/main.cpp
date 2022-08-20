@@ -28,7 +28,7 @@ std::vector<std::string> getFiles(std::string directory, std::string regexStr, b
     std::string current_path = std::filesystem::current_path();
 
 	std::vector<std::string> files;
-	for(std::filesystem::recursive_directory_iterator i(".."), end; i != end; ++i) {
+	for(std::filesystem::recursive_directory_iterator i(directory), end; i != end; ++i) {
 		if(!is_directory(i->path())) {
 			std::string str = i->path();
 			if(std::regex_match(str, std::regex(regexStr))) {
@@ -78,7 +78,7 @@ void updateHashAtIndex(merkle::Tree &tree, int index, std::string hash_string) {
 
 int main() {
 	// Get the list of code file names
-	std::vector<std::string> files = getFiles("..", ".*(\\.cpp|\\.c|\\.h|\\.cc|\\.py|\\.sh)", true);
+	std::vector<std::string> files = getFiles("../src", ".*(\\.cpp|\\.c|\\.h|\\.cc|\\.py|\\.sh)", false);
 	std::vector<std::string> hashes (files.size());
 	// Compute the hash of the files
 	for(int i = 0; i < files.size(); i++) {
@@ -116,7 +116,7 @@ int main() {
 	// Update the ID
 	updateHashAtIndex(tree, 0, "0000000000000000000000000000000000000000000000000000000000000000");
 
-	if(tree.root().to_string() == "fbdef921f44b67c5104404a2b1d496cedc5001a7bd321fb31bda1a7ac4cef571") {
+	if(tree.root().to_string() == "84c1bf926ec6dbbaefec2ee176a05501d2e5fe472dd292e53ad28dfc5115396c") {
 		std::cout << "Correct version" << std::endl;
 	} else {
 		std::cout << "Incorrect version: " << tree.root().to_string() << std::endl;
