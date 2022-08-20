@@ -123,7 +123,7 @@ int main() {
 	// Update the ID
 	updateHashAtIndex(tree, 0, "0000000000000000000000000000000000000000000000000000000000000000");
 
-	if(tree.root().to_string() == "202b56e3e5a7752d58729bab11e3a39afee482c107ce094bc1f519700afdeb8e") {
+	if(tree.root().to_string() == "ec68983ce11014cf86a2ca0d63df46aeb9e2bcd4e51722b11fc420889e28db45") {
 		std::cout << "Correct version!" << std::endl;
 	} else {
 		std::cout << "Incorrect version: " << tree.root().to_string() << std::endl;
