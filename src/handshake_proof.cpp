@@ -97,7 +97,11 @@ class HandshakeProof {
                 return false;
             }
             LogPrint(BCLog::HANDSHAKE_PROOF, "\nVerifying handshake proof for \"%s\"", ID);
-            return generateProof(ID) == combined;
+
+            updateHashAtIndex(tree, 0, sha256(ID));
+            std::string proof = tree.root().to_string();
+            LogPrint(BCLog::HANDSHAKE_PROOF, "\n\"%s\" == \"%s\"", proof, hash);
+            return proof == hash;
         }
 
         // Update the hash at an index within the tree
