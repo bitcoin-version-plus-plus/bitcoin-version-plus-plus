@@ -97,7 +97,7 @@ class HandshakeProof {
                 return false;
             }
             LogPrint(BCLog::HANDSHAKE_PROOF, "\nVerifying handshake proof for \"%s\"", ID);
-            return generateProof(ID) == hash;
+            return generateProof(ID) == combined;
         }
 
         // Update the hash at an index within the tree
