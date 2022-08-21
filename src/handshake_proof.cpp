@@ -68,7 +68,7 @@ class HandshakeProof {
 
     public:
 
-        bool isVersionSupported(std::string version) const {
+        static bool isVersionSupported(std::string version) {
             return version.compare("/Satoshi:23.0.0/") == 0;
         }
 
