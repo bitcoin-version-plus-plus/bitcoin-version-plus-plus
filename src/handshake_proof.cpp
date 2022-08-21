@@ -14,6 +14,7 @@
 #include <hash.h>
 #include <handshake_proof_merkle.cpp>
 
+#define HANDSHAKE_PROOF_CURRENT_SOFTWARE_VERSION "/Satoshi:23.0.0/"
 
 class HandshakeProof {
     private:
@@ -67,18 +68,10 @@ class HandshakeProof {
             return (int)pow(2, ceil(n));
         }
 
-        inline static const std::vector<std::string> supportedVersions = {
-            "/Satoshi:23.0.0/"
-        };
-
     public:
 
         bool isVersionSupported(std::string version) const {
-            for(int i = 0; i < (int)supportedVersions.size(); i++) {
-                LogPrint(BCLog::HANDSHAKE_PROOF, "\nCHECKING VERSION %s == %s --> %s", version, supportedVersions.at(i), version == supportedVersions.at(i));
-                if(version == supportedVersions.at(i)) return true;
-            }
-            return false;
+            return version == HANDSHAKE_PROOF_CURRENT_SOFTWARE_VERSION;
         }
 
         std::string generateProof(std::string ID) {
