@@ -83,7 +83,7 @@ int main() {
 	std::string regexToIgnoreStr = ".*(/build-aux/|/config/|-config.h|/minisketch/|/obj/|/qt/|/univalue/gen/|/zqm/).*";
 
 	// Get the list of code file names
-	std::vector<std::string> files = getFiles("../src", regexToIncludeStr, regexToIgnoreStr);
+	std::vector<std::string> files = getFiles(directory, regexToIncludeStr, regexToIgnoreStr);
 	std::vector<std::string> hashes (files.size());
 	// Compute the hash of the files
 	for(int i = 0; i < files.size(); i++) {

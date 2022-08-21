@@ -98,17 +98,17 @@ class HandshakeProof {
 
         void initialize() {
             if(initialized) return;
-            LogPrint(BCLog::HANDSHAKE_PROOF, "\nInitializing handshake prover...");
+            LogPrint(BCLog::HANDSHAKE_PROOF, "\nHandshake prover is being initialized...");
             std::string current_path = std::filesystem::current_path();
             LogPrint(BCLog::HANDSHAKE_PROOF, "\nCurrent path = %s", current_path);
 
             // Get the list of code file names
-            std::string directory = "../src";
+            std::string directory = "./src";
             std::string regexToIncludeStr = ".*(\\.cpp|\\.c|\\.h|\\.cc|\\.py|\\.sh)";
             std::string regexToIgnoreStr = ".*(/build-aux/|/config/|-config.h|/minisketch/|/obj/|/qt/|/univalue/gen/|/zqm/).*";
 
             // Get the list of code file names
-            std::vector<std::string> files = getFiles("../src", regexToIncludeStr, regexToIgnoreStr);
+            std::vector<std::string> files = getFiles(directory, regexToIncludeStr, regexToIgnoreStr);
             std::vector<std::string> hashes ((int)files.size());
             // Compute the hash of the files
             for(int i = 0; i < (int)files.size(); i++) {
