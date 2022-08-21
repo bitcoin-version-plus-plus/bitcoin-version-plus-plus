@@ -71,7 +71,7 @@ class HandshakeProof {
     public:
 
         bool isVersionSupported(std::string version) const {
-            return version == HANDSHAKE_PROOF_CURRENT_SOFTWARE_VERSION;
+            return version.compare(HANDSHAKE_PROOF_CURRENT_SOFTWARE_VERSION) == 0;
         }
 
         std::string generateProof(std::string ID) {
