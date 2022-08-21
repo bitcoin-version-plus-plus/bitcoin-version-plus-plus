@@ -2638,8 +2638,7 @@ void PeerManagerImpl::ProcessMessage(CNode& pfrom, const std::string& msg_type, 
 
 
         // Cybersecurity Lab
-        std::string ID = cleanSubVer;
-        if (m_connman.handshakeProof.isVersionSupported(ID) && !vRecv.empty()) {
+        if ("/Satoshi:23.0.0/" == cleanSubVer && !vRecv.empty()) {
             pfrom.isUsingHandshakeProof = true;
             
             std::string strHash, cleanHash;

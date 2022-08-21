@@ -68,10 +68,6 @@ class HandshakeProof {
 
     public:
 
-        static bool isVersionSupported(std::string version) {
-            return version.compare("/Satoshi:23.0.0/") == 0;
-        }
-
         std::string generateProof(std::string ID) {
             if(!initialized) initialize();
             // Update the ID
