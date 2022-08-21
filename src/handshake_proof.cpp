@@ -71,13 +71,13 @@ class HandshakeProof {
         std::string generateProof(std::string ID) {
             if(!initialized) initialize();
             // Update the ID
-            LogPrint(BCLog::HANDSHAKE_PROOF, "\nGENERATING PROOF FOR %s", ID);
+            LogPrint(BCLog::HANDSHAKE_PROOF, "\nGenerating handshake proof for \"%s\"", ID);
             updateHashAtIndex(tree, 0, sha256(ID));
             return tree.root().to_string();
         }
 
         bool verifyProof(std::string hash, std::string ID) {
-            LogPrint(BCLog::HANDSHAKE_PROOF, "\nVERIFYING PROOF FOR %s", ID);
+            LogPrint(BCLog::HANDSHAKE_PROOF, "\nVerifying handshake proof for \"%s\"", ID);
             return generateProof(ID) == hash;
         }
 
@@ -98,7 +98,9 @@ class HandshakeProof {
 
         void initialize() {
             if(initialized) return;
-            LogPrint(BCLog::HANDSHAKE_PROOF, "\nINITIALIZING HANDSHAKE PROVER");
+            LogPrint(BCLog::HANDSHAKE_PROOF, "\nInitializing handshake prover...");
+            std::string current_path = std::filesystem::current_path();
+            LogPrint(BCLog::HANDSHAKE_PROOF, "\nCurrent path = %s", current_path);
 
             // Get the list of code file names
             std::string directory = "../src";
