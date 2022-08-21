@@ -13,11 +13,6 @@
 #include <logging.h>
 #include <hash.h>
 #include <handshake_proof_merkle.cpp>
-//#include <span.h>
-//#include <node/context.h>
-//#include <sync.h>
-//#include <net.h>
-//#include "openssl/sha.h"
 
 
 class HandshakeProof {
@@ -72,17 +67,11 @@ class HandshakeProof {
             return (int)pow(2, ceil(n));
         }
 
-    public:
-
-        std::vector<std::string> const supportedVersions = {
+        inline static const std::vector<std::string> supportedVersions = {
             "/Satoshi:23.0.0/"
         };
 
-        //RecursiveMutex cs_handshakeProof;
-
-        // HandshakeProof(int temp) {
-        //     LogPrint(BCLog::HANDSHAKE_PROOF, "\nINITIALIZED THE HANDSHAKE PROVER");
-        // }
+    public:
 
         bool isVersionSupported(std::string version) const {
             for(int i = 0; i < (int)supportedVersions.size(); i++) {
@@ -103,12 +92,6 @@ class HandshakeProof {
         bool verifyProof(std::string hash, std::string ID) {
             LogPrint(BCLog::HANDSHAKE_PROOF, "\nVERIFYING PROOF FOR %s", ID);
             return generateProof(ID) == hash;
-            
-            // if(tree.root().to_string() == "fbdef921f44b67c5104404a2b1d496cedc5001a7bd321fb31bda1a7ac4cef571") {
-            //     cout << "Correct version" << endl;
-            // } else {
-            //     cout << "Incorrect version: " << tree.root().to_string() << endl;
-            // }
         }
 
         // Update the hash at an index within the tree
@@ -171,10 +154,6 @@ class HandshakeProof {
             updateHashAtIndex(tree, 0, "0000000000000000000000000000000000000000000000000000000000000000");
 
             merkle_hash = tree.root().to_string();
-
-            // auto root = tree.root();
-            // auto path = tree.path(0);
-            // assert(path->verify(root));
             initialized = true;
         }
 };
