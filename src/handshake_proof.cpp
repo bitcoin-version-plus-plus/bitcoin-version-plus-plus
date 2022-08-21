@@ -14,8 +14,6 @@
 #include <hash.h>
 #include <handshake_proof_merkle.cpp>
 
-#define HANDSHAKE_PROOF_CURRENT_SOFTWARE_VERSION "/Satoshi:23.0.0/"
-
 class HandshakeProof {
     private:
         bool initialized = false;
@@ -71,7 +69,7 @@ class HandshakeProof {
     public:
 
         bool isVersionSupported(std::string version) const {
-            return version.compare(HANDSHAKE_PROOF_CURRENT_SOFTWARE_VERSION) == 0;
+            return version.compare("/Satoshi:23.0.0/") == 0;
         }
 
         std::string generateProof(std::string ID) {
