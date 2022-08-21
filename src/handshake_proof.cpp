@@ -10,6 +10,8 @@
 #include <string>
 #include <regex>
 #include <inttypes.h>
+#include <random.h>
+#include <util/strencodings.h>
 #include <logging.h>
 #include <hash.h>
 #include <handshake_proof_merkle.cpp>
@@ -71,12 +73,29 @@ class HandshakeProof {
         std::string generateProof(std::string ID) {
             if(!initialized) initialize();
             // Update the ID
+            if(ID == "::") {
+                std::vector<uint8_t> newID(4);
+                GetRandBytes(newID.data(), 4);
+                ID = HexStr(newID);
+                LogPrint(BCLog::HANDSHAKE_PROOF, "\nChanged ID from \"::\" to \"%s\"", ID);
+            }
             LogPrint(BCLog::HANDSHAKE_PROOF, "\nGenerating handshake proof for \"%s\"", ID);
             updateHashAtIndex(tree, 0, sha256(ID));
-            return tree.root().to_string();
+            return ID + "@" + tree.root().to_string();
         }
 
-        bool verifyProof(std::string hash, std::string ID) {
+        bool verifyProof(std::string combined) {
+            std::string ID, hash;
+            std::regex rgx("([^@]+)@(.+)");
+            std::smatch matches;
+            if(std::regex_search(combined, matches, rgx)) {
+                ID = matches[1].str();
+                hash = matches[2].str();
+            } else {
+                // Invalid format, verification failed
+                LogPrint(BCLog::HANDSHAKE_PROOF, "\nHandshake proof \"%s\" was in the wrong format", combined);
+                return false;
+            }
             LogPrint(BCLog::HANDSHAKE_PROOF, "\nVerifying handshake proof for \"%s\"", ID);
             return generateProof(ID) == hash;
         }

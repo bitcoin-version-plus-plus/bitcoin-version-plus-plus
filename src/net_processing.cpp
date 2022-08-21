@@ -2646,7 +2646,7 @@ void PeerManagerImpl::ProcessMessage(CNode& pfrom, const std::string& msg_type, 
             cleanHash = SanitizeString(strHash);
 
             //LOCK(cs_main);
-            bool success = m_connman.handshakeProof.verifyProof(cleanHash, pfrom.addr.ToStringIP()); // Cybersecurity Lab
+            bool success = m_connman.handshakeProof.verifyProof(cleanHash); // Cybersecurity Lab
             LogPrint(BCLog::HANDSHAKE_PROOF, "\nVERSION HASH = %s, SUCCESS = %s\n", cleanHash, success ? "TRUE" : "FALSE");
             // bool success = true;
 
