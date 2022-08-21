@@ -2638,7 +2638,8 @@ void PeerManagerImpl::ProcessMessage(CNode& pfrom, const std::string& msg_type, 
 
 
         // Cybersecurity Lab
-        if (m_connman.handshakeProof.isVersionSupported(cleanSubVer) && !vRecv.empty()) {
+        std::string ID = cleanSubVer;
+        if (m_connman.handshakeProof.isVersionSupported(ID) && !vRecv.empty()) {
             pfrom.isUsingHandshakeProof = true;
             
             std::string strHash, cleanHash;
