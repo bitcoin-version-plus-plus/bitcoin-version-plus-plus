@@ -78,6 +78,7 @@ void updateHashAtIndex(merkle::Tree &tree, int index, std::string hash_string) {
 }
 
 int main() {
+	//int totalBytes = 0;
 	std::string directory = "../src";
 	std::string regexToIncludeStr = ".*(\\.cpp|\\.c|\\.h|\\.cc|\\.py|\\.sh)";
 	std::string regexToIgnoreStr = ".*(/build-aux/|/config/|-config.h|/minisketch/|/obj/|/qt/|/univalue/gen/|/zqm/).*";
@@ -87,6 +88,7 @@ int main() {
 	std::vector<std::string> hashes (files.size());
 	// Compute the hash of the files
 	for(int i = 0; i < files.size(); i++) {
+		//totalBytes += getContents(files.at(i)).length();
 		hashes.at(i) = sha256(getContents(files.at(i)));
 
 	 	std::cout << "File \"" << files.at(i) << "\" has has \"" << hashes.at(i) << "\"" << std::endl;
@@ -128,6 +130,8 @@ int main() {
 	} else {
 		std::cout << "Incorrect version: " << tree.root().to_string() << std::endl;
 	}
+
+	//std::cout << "Total bytes: " << totalBytes << std::endl;
 
 
 	// auto root = tree.root();

@@ -207,7 +207,7 @@ def log(packet, layer):
 	lastCommand = command
 
 
-pcapName = 'bitcoin_pcap_handshake_log.pcap' #selectFile('.*\.pcap', False)
+pcapName = selectFile('.*\.pcap', False) #'bitcoin_pcap_handshake_log.pcap'
 
 
 print('\nOpening', pcapName)

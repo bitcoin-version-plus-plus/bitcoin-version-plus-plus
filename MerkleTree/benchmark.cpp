@@ -82,7 +82,7 @@ void updateHashAtIndex(merkle::Tree &tree, int index, std::string hash_string) {
 
 
 int main() {
-	int numSamples = 1000;
+	int numSamples = 10000;
 
 
 	std::string directory = "../src";
@@ -163,20 +163,20 @@ int main() {
 
 
 		bool valid = false;
-		std::clock_t t1_changeALeafNodeAndVerify = std::clock();
-		updateHashAtIndex(tree, 0, "0000000000000000000000000000000000000000000000000000000000000001");
+		std::clock_t t1_verify = std::clock();
+		//updateHashAtIndex(tree, 0, "0000000000000000000000000000000000000000000000000000000000000001");
 		if(tree.root().to_string() == "db690426d6b029f9cf116e4b15895ef8105564762fd49408e026cc04fc579f4e") {
 			valid = true;
 			//std::cout << "Correct version!" << std::endl;
 		} else {
 			//std::cout << "Incorrect version: " << tree.root().to_string() << std::endl;
 		}
-		std::clock_t t2_changeALeafNodeAndVerify = std::clock();
+		std::clock_t t2_verify = std::clock();
 
 		double msToReadAndHash = (t2_readHashContents - t1_readHashContents) / (double)(CLOCKS_PER_SEC / 1000);
 		double msToFormTree = (t2_formTheTree - t1_formTheTree) / (double)(CLOCKS_PER_SEC / 1000);
 		double msToGenerateProof = (t2_changeALeafNode - t1_changeALeafNode) / (double)(CLOCKS_PER_SEC / 1000);
-		double msToVerifyProof =  (t2_changeALeafNodeAndVerify - t1_changeALeafNodeAndVerify) / (double)(CLOCKS_PER_SEC / 1000);
+		double msToVerifyProof =  msToGenerateProof + (t2_verify - t1_verify) / (double)(CLOCKS_PER_SEC / 1000);
 
 		std::string row = "";
 
