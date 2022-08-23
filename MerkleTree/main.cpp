@@ -131,8 +131,8 @@ int main() {
 		std::cout << "Incorrect version: " << tree.root().to_string() << std::endl;
 	}
 
-	//std::cout << "Total bytes: " << totalBytes << std::endl;
-
+	//std::cout << "Total file bytes: " << totalBytes << std::endl;
+	std::cout << "Total tree bytes: " << tree.to_string().length() << std::endl;
 
 	// auto root = tree.root();
 	// auto path = tree.path(0);
