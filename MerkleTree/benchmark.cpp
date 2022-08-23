@@ -155,6 +155,10 @@ int main() {
 		tree.insert(leaves);
 		std::clock_t t2_formTheTree = std::clock();
 
+
+		updateHashAtIndex(tree, 0, "0000000000000000000000000000000000000000000000000000000000000000");
+
+
 		// Update the ID
 
 		std::clock_t t1_changeALeafNode = std::clock();
@@ -164,7 +168,7 @@ int main() {
 
 		bool valid = false;
 		std::clock_t t1_verify = std::clock();
-		//updateHashAtIndex(tree, 0, "0000000000000000000000000000000000000000000000000000000000000001");
+		updateHashAtIndex(tree, 0, "0000000000000000000000000000000000000000000000000000000000000001");
 		if(tree.root().to_string() == "db690426d6b029f9cf116e4b15895ef8105564762fd49408e026cc04fc579f4e") {
 			valid = true;
 			//std::cout << "Correct version!" << std::endl;
@@ -176,7 +180,7 @@ int main() {
 		double msToReadAndHash = (t2_readHashContents - t1_readHashContents) / (double)(CLOCKS_PER_SEC / 1000);
 		double msToFormTree = (t2_formTheTree - t1_formTheTree) / (double)(CLOCKS_PER_SEC / 1000);
 		double msToGenerateProof = (t2_changeALeafNode - t1_changeALeafNode) / (double)(CLOCKS_PER_SEC / 1000);
-		double msToVerifyProof =  msToGenerateProof + (t2_verify - t1_verify) / (double)(CLOCKS_PER_SEC / 1000);
+		double msToVerifyProof =  (t2_verify - t1_verify) / (double)(CLOCKS_PER_SEC / 1000);
 
 		std::string row = "";
 
