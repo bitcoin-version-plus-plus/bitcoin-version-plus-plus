@@ -154,6 +154,7 @@ CFeeRate minRelayTxFee = CFeeRate(DEFAULT_MIN_RELAY_TX_FEE);
 
 CBlockIndex* CChainState::FindForkInGlobalIndex(const CBlockLocator& locator) const
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(cs_main);
 
     // Find the latest block common to locator and chain - we expect that
@@ -180,6 +181,7 @@ bool CheckInputScripts(const CTransaction& tx, TxValidationState& state,
 
 bool CheckFinalTx(const CBlockIndex* active_chain_tip, const CTransaction &tx, int flags)
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(cs_main);
     assert(active_chain_tip); // TODO: Make active_chain_tip a reference
 
@@ -288,6 +290,7 @@ static unsigned int GetBlockScriptFlags(const CBlockIndex* pindex, const Consens
 static void LimitMempoolSize(CTxMemPool& pool, CCoinsViewCache& coins_cache, size_t limit, std::chrono::seconds age)
     EXCLUSIVE_LOCKS_REQUIRED(::cs_main, pool.cs)
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(::cs_main);
     AssertLockHeld(pool.cs);
     int expired = pool.Expire(GetTime<std::chrono::seconds>() - age);
@@ -303,6 +306,7 @@ static void LimitMempoolSize(CTxMemPool& pool, CCoinsViewCache& coins_cache, siz
 
 static bool IsCurrentForFeeEstimation(CChainState& active_chainstate) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(cs_main);
     if (active_chainstate.IsInitialBlockDownload())
         return false;
@@ -319,6 +323,7 @@ void CChainState::MaybeUpdateMempoolForReorg(
 {
     if (!m_mempool) return;
 
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(cs_main);
     AssertLockHeld(m_mempool->cs);
     std::vector<uint256> vHashUpdate;
@@ -361,6 +366,7 @@ void CChainState::MaybeUpdateMempoolForReorg(
     const auto filter_final_and_mature = [this, flags=STANDARD_LOCKTIME_VERIFY_FLAGS](CTxMemPool::txiter it)
         EXCLUSIVE_LOCKS_REQUIRED(m_mempool->cs, ::cs_main) {
         AssertLockHeld(m_mempool->cs);
+        LOCK(cs_main); // !!!!!!
         AssertLockHeld(::cs_main);
         const CTransaction& tx = it->GetTx();
 
@@ -420,6 +426,7 @@ static bool CheckInputsFromMempoolAndCache(const CTransaction& tx, TxValidationS
                 unsigned int flags, PrecomputedTransactionData& txdata, CCoinsViewCache& coins_tip)
                 EXCLUSIVE_LOCKS_REQUIRED(cs_main, pool.cs)
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(cs_main);
     AssertLockHeld(pool.cs);
 
@@ -632,6 +639,7 @@ private:
     // Compare a package's feerate against minimum allowed.
     bool CheckFeeRate(size_t package_size, CAmount package_fee, TxValidationState& state) EXCLUSIVE_LOCKS_REQUIRED(::cs_main, m_pool.cs)
     {
+        LOCK(cs_main); // !!!!!!
         AssertLockHeld(::cs_main);
         AssertLockHeld(m_pool.cs);
         CAmount mempoolRejectFee = m_pool.GetMinFee(gArgs.GetIntArg("-maxmempool", DEFAULT_MAX_MEMPOOL_SIZE) * 1000000).GetFee(package_size);
@@ -667,6 +675,7 @@ private:
 
 bool MemPoolAccept::PreChecks(ATMPArgs& args, Workspace& ws)
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(cs_main);
     AssertLockHeld(m_pool.cs);
     const CTransactionRef& ptx = ws.m_ptx;
@@ -907,6 +916,7 @@ bool MemPoolAccept::PreChecks(ATMPArgs& args, Workspace& ws)
 
 bool MemPoolAccept::ReplacementChecks(Workspace& ws)
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(cs_main);
     AssertLockHeld(m_pool.cs);
 
@@ -954,6 +964,7 @@ bool MemPoolAccept::ReplacementChecks(Workspace& ws)
 bool MemPoolAccept::PackageMempoolChecks(const std::vector<CTransactionRef>& txns,
                                          PackageValidationState& package_state)
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(cs_main);
     AssertLockHeld(m_pool.cs);
 
@@ -972,6 +983,7 @@ bool MemPoolAccept::PackageMempoolChecks(const std::vector<CTransactionRef>& txn
 
 bool MemPoolAccept::PolicyScriptChecks(const ATMPArgs& args, Workspace& ws)
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(cs_main);
     AssertLockHeld(m_pool.cs);
     const CTransaction& tx = *ws.m_ptx;
@@ -1000,6 +1012,7 @@ bool MemPoolAccept::PolicyScriptChecks(const ATMPArgs& args, Workspace& ws)
 
 bool MemPoolAccept::ConsensusScriptChecks(const ATMPArgs& args, Workspace& ws)
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(cs_main);
     AssertLockHeld(m_pool.cs);
     const CTransaction& tx = *ws.m_ptx;
@@ -1034,6 +1047,7 @@ bool MemPoolAccept::ConsensusScriptChecks(const ATMPArgs& args, Workspace& ws)
 
 bool MemPoolAccept::Finalize(const ATMPArgs& args, Workspace& ws)
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(cs_main);
     AssertLockHeld(m_pool.cs);
     const CTransaction& tx = *ws.m_ptx;
@@ -1082,6 +1096,7 @@ bool MemPoolAccept::SubmitPackage(const ATMPArgs& args, std::vector<Workspace>& 
                                   PackageValidationState& package_state,
                                   std::map<const uint256, const MempoolAcceptResult>& results)
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(cs_main);
     AssertLockHeld(m_pool.cs);
     // Sanity check: none of the transactions should be in the mempool, and none of the transactions
@@ -1155,6 +1170,7 @@ bool MemPoolAccept::SubmitPackage(const ATMPArgs& args, std::vector<Workspace>& 
 
 MempoolAcceptResult MemPoolAccept::AcceptSingleTransaction(const CTransactionRef& ptx, ATMPArgs& args)
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(cs_main);
     LOCK(m_pool.cs); // mempool "read lock" (held through GetMainSignals().TransactionAddedToMempool())
 
@@ -1184,6 +1200,7 @@ MempoolAcceptResult MemPoolAccept::AcceptSingleTransaction(const CTransactionRef
 
 PackageMempoolAcceptResult MemPoolAccept::AcceptMultipleTransactions(const std::vector<CTransactionRef>& txns, ATMPArgs& args)
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(cs_main);
 
     // These context-free package limits can be done before taking the mempool lock.
@@ -1250,6 +1267,7 @@ PackageMempoolAcceptResult MemPoolAccept::AcceptMultipleTransactions(const std::
 
 PackageMempoolAcceptResult MemPoolAccept::AcceptPackage(const Package& package, ATMPArgs& args)
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(cs_main);
     PackageValidationState package_state;
 
@@ -1385,6 +1403,7 @@ MempoolAcceptResult AcceptToMemoryPool(CChainState& active_chainstate, const CTr
 PackageMempoolAcceptResult ProcessNewPackage(CChainState& active_chainstate, CTxMemPool& pool,
                                                    const Package& package, bool test_accept)
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(cs_main);
     assert(!package.empty());
     assert(std::all_of(package.cbegin(), package.cend(), [](const auto& tx){return tx != nullptr;}));
@@ -1468,6 +1487,7 @@ void CChainState::InitCoinsDB(
 
 void CChainState::InitCoinsCache(size_t cache_size_bytes)
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(::cs_main);
     assert(m_coins_views != nullptr);
     m_coinstip_cache_size_bytes = cache_size_bytes;
@@ -1523,6 +1543,7 @@ static void AlertNotify(const std::string& strMessage)
 
 void CChainState::CheckForkWarningConditions()
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(cs_main);
 
     // Before we get past initial download, we cannot reliably alert about forks
@@ -1542,6 +1563,7 @@ void CChainState::CheckForkWarningConditions()
 // Called both upon regular invalid block discovery *and* InvalidateBlock
 void CChainState::InvalidChainFound(CBlockIndex* pindexNew)
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(cs_main);
     if (!m_chainman.m_best_invalid || pindexNew->nChainWork > m_chainman.m_best_invalid->nChainWork) {
         m_chainman.m_best_invalid = pindexNew;
@@ -1565,6 +1587,7 @@ void CChainState::InvalidChainFound(CBlockIndex* pindexNew)
 // which does its own setBlockIndexCandidates management.
 void CChainState::InvalidBlockFound(CBlockIndex* pindex, const BlockValidationState& state)
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(cs_main);
     if (state.GetResult() != BlockValidationResult::BLOCK_MUTATED) {
         pindex->nStatus |= BLOCK_FAILED_VALID;
@@ -1767,6 +1790,7 @@ int ApplyTxInUndo(Coin&& undo, CCoinsViewCache& view, const COutPoint& out)
  *  When FAILED is returned, view is left in an indeterminate state. */
 DisconnectResult CChainState::DisconnectBlock(const CBlock& block, const CBlockIndex* pindex, CCoinsViewCache& view)
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(::cs_main);
     bool fClean = true;
 
@@ -1924,6 +1948,7 @@ static int64_t nBlocksTotal = 0;
 bool CChainState::ConnectBlock(const CBlock& block, BlockValidationState& state, CBlockIndex* pindex,
                                CCoinsViewCache& view, bool fJustCheck)
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(cs_main);
     assert(pindex);
 
@@ -2233,6 +2258,7 @@ bool CChainState::ConnectBlock(const CBlock& block, BlockValidationState& state,
 
 CoinsCacheSizeState CChainState::GetCoinsCacheSizeState()
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(::cs_main);
     return this->GetCoinsCacheSizeState(
         m_coinstip_cache_size_bytes,
@@ -2243,6 +2269,7 @@ CoinsCacheSizeState CChainState::GetCoinsCacheSizeState(
     size_t max_coins_cache_size_bytes,
     size_t max_mempool_size_bytes)
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(::cs_main);
     const int64_t nMempoolUsage = m_mempool ? m_mempool->DynamicMemoryUsage() : 0;
     int64_t cacheSize = CoinsTip().DynamicMemoryUsage();
@@ -2437,6 +2464,7 @@ static void UpdateTipLog(
     const std::string& warning_messages) EXCLUSIVE_LOCKS_REQUIRED(::cs_main)
 {
 
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(::cs_main);
     LogPrintf("%s%s: new best=%s height=%d version=0x%08x log2_work=%f tx=%lu date='%s' progress=%f cache=%.1fMiB(%utxo)%s\n",
         prefix, func_name,
@@ -2451,6 +2479,7 @@ static void UpdateTipLog(
 
 void CChainState::UpdateTip(const CBlockIndex* pindexNew)
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(::cs_main);
     const auto& coins_tip = this->CoinsTip();
 
@@ -2507,6 +2536,7 @@ void CChainState::UpdateTip(const CBlockIndex* pindexNew)
   */
 bool CChainState::DisconnectTip(BlockValidationState& state, DisconnectedBlockTransactions* disconnectpool)
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(cs_main);
     if (m_mempool) AssertLockHeld(m_mempool->cs);
 
@@ -2610,6 +2640,7 @@ public:
  */
 bool CChainState::ConnectTip(BlockValidationState& state, CBlockIndex* pindexNew, const std::shared_ptr<const CBlock>& pblock, ConnectTrace& connectTrace, DisconnectedBlockTransactions& disconnectpool)
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(cs_main);
     if (m_mempool) AssertLockHeld(m_mempool->cs);
 
@@ -2677,6 +2708,7 @@ bool CChainState::ConnectTip(BlockValidationState& state, CBlockIndex* pindexNew
  */
 CBlockIndex* CChainState::FindMostWorkChain()
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(::cs_main);
     do {
         CBlockIndex *pindexNew = nullptr;
@@ -2753,6 +2785,7 @@ void CChainState::PruneBlockIndexCandidates() {
  */
 bool CChainState::ActivateBestChainStep(BlockValidationState& state, CBlockIndex* pindexMostWork, const std::shared_ptr<const CBlock>& pblock, bool& fInvalidFound, ConnectTrace& connectTrace)
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(cs_main);
     if (m_mempool) AssertLockHeld(m_mempool->cs);
 
@@ -3152,6 +3185,7 @@ bool CChainState::InvalidateBlock(BlockValidationState& state, CBlockIndex* pind
 }
 
 void CChainState::ResetBlockFailureFlags(CBlockIndex *pindex) {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(cs_main);
 
     int nHeight = pindex->nHeight;
@@ -3188,6 +3222,7 @@ void CChainState::ResetBlockFailureFlags(CBlockIndex *pindex) {
 /** Mark a block as having its data received and checked (up to BLOCK_VALID_TRANSACTIONS). */
 void CChainState::ReceivedBlockTransactions(const CBlock& block, CBlockIndex* pindexNew, const FlatFilePos& pos)
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(cs_main);
     pindexNew->nTx = block.vtx.size();
     pindexNew->nChainTx = 0;
@@ -3363,6 +3398,7 @@ std::vector<unsigned char> GenerateCoinbaseCommitment(CBlock& block, const CBloc
  */
 static bool ContextualCheckBlockHeader(const CBlockHeader& block, BlockValidationState& state, BlockManager& blockman, const CChainParams& params, const CBlockIndex* pindexPrev, int64_t nAdjustedTime) EXCLUSIVE_LOCKS_REQUIRED(::cs_main)
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(::cs_main);
     assert(pindexPrev != nullptr);
     const int nHeight = pindexPrev->nHeight + 1;
@@ -3493,6 +3529,7 @@ static bool ContextualCheckBlock(const CBlock& block, BlockValidationState& stat
 
 bool ChainstateManager::AcceptBlockHeader(const CBlockHeader& block, BlockValidationState& state, const CChainParams& chainparams, CBlockIndex** ppindex)
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(cs_main);
     // Check for duplicate
     uint256 hash = block.GetHash();
@@ -3615,6 +3652,7 @@ bool CChainState::AcceptBlock(const std::shared_ptr<const CBlock>& pblock, Block
     const CBlock& block = *pblock;
 
     if (fNewBlock) *fNewBlock = false;
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(cs_main);
 
     CBlockIndex *pindexDummy = nullptr;
@@ -3734,6 +3772,7 @@ bool ChainstateManager::ProcessNewBlock(const CChainParams& chainparams, const s
 
 MempoolAcceptResult ChainstateManager::ProcessTransaction(const CTransactionRef& tx, bool test_accept)
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(cs_main);
     CChainState& active_chainstate = ActiveChainstate();
     if (!active_chainstate.GetMempool()) {
@@ -3754,6 +3793,7 @@ bool TestBlockValidity(BlockValidationState& state,
                        bool fCheckPOW,
                        bool fCheckMerkleRoot)
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(cs_main);
     assert(pindexPrev && pindexPrev == chainstate.m_chain.Tip());
     CCoinsViewCache viewNew(&chainstate.CoinsTip());
@@ -3799,6 +3839,7 @@ void CChainState::LoadMempool(const ArgsManager& args)
 
 bool CChainState::LoadChainTip()
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(cs_main);
     const CCoinsViewCache& coins_cache = CoinsTip();
     assert(!coins_cache.GetBestBlock().IsNull()); // Never called when the coins view is empty
@@ -3841,6 +3882,7 @@ bool CVerifyDB::VerifyDB(
     CCoinsView& coinsview,
     int nCheckLevel, int nCheckDepth)
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(cs_main);
 
     if (chainstate.m_chain.Tip() == nullptr || chainstate.m_chain.Tip()->pprev == nullptr) {
@@ -3954,6 +3996,7 @@ bool CVerifyDB::VerifyDB(
 /** Apply the effects of a block on the utxo cache, ignoring that it may already have been applied. */
 bool CChainState::RollforwardBlock(const CBlockIndex* pindex, CCoinsViewCache& inputs)
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(cs_main);
     // TODO: merge with ConnectBlock
     CBlock block;
@@ -4042,6 +4085,7 @@ bool CChainState::ReplayBlocks()
 
 bool CChainState::NeedsRedownload() const
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(cs_main);
 
     // At and above m_params.SegwitHeight, segwit consensus rules must be validated
@@ -4060,6 +4104,7 @@ bool CChainState::NeedsRedownload() const
 
 void CChainState::UnloadBlockIndex()
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(::cs_main);
     nBlockSequenceId = 1;
     setBlockIndexCandidates.clear();
@@ -4083,6 +4128,7 @@ void UnloadBlockIndex(CTxMemPool* mempool, ChainstateManager& chainman)
 
 bool ChainstateManager::LoadBlockIndex()
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(cs_main);
     // Load block index from databases
     bool needs_init = fReindex;
@@ -4473,6 +4519,7 @@ void CChainState::CheckBlockIndex()
 
 std::string CChainState::ToString()
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(::cs_main);
     CBlockIndex* tip = m_chain.Tip();
     return strprintf("Chainstate [%s] @ height %d (%s)",
@@ -4482,6 +4529,7 @@ std::string CChainState::ToString()
 
 bool CChainState::ResizeCoinsCaches(size_t coinstip_size, size_t coinsdb_size)
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(::cs_main);
     if (coinstip_size == m_coinstip_cache_size_bytes &&
             coinsdb_size == m_coinsdb_cache_size_bytes) {
@@ -4707,6 +4755,7 @@ std::vector<CChainState*> ChainstateManager::GetAll()
 CChainState& ChainstateManager::InitializeChainstate(
     CTxMemPool* mempool, const std::optional<uint256>& snapshot_blockhash)
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(::cs_main);
     bool is_snapshot = snapshot_blockhash.has_value();
     std::unique_ptr<CChainState>& to_modify =
@@ -5045,6 +5094,7 @@ bool ChainstateManager::IsSnapshotActive() const
 
 void ChainstateManager::Unload()
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(::cs_main);
     for (CChainState* chainstate : this->GetAll()) {
         chainstate->m_chain.SetTip(nullptr);
@@ -5067,6 +5117,7 @@ void ChainstateManager::Reset()
 
 void ChainstateManager::MaybeRebalanceCaches()
 {
+    LOCK(cs_main); // !!!!!!
     AssertLockHeld(::cs_main);
     if (m_ibd_chainstate && !m_snapshot_chainstate) {
         LogPrintf("[snapshot] allocating all cache to the IBD chainstate\n");

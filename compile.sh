@@ -1,3 +1,4 @@
+#rm -rf src/*.o
 #rm -rf src/bitcoind
 #rm -rf src/bitcoin-cli
 

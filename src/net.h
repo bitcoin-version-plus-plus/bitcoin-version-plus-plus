@@ -286,6 +286,10 @@ public:
     Network m_network;
     uint32_t m_mapped_as;
     ConnectionType m_conn_type;
+
+    // Cybersecurity Lab
+    bool isUsingHandshakeProof = false;
+    std::string handshakeProofStatus = "";
 };
 
 
@@ -482,7 +486,8 @@ public:
     std::atomic_bool fPauseSend{false};
 
     // Cybersecurity Lab
-    bool isUsingHandshakeProof = true;
+    bool isUsingHandshakeProof = false;
+    std::string handshakeProofStatus = "";
 
     bool IsOutboundOrBlockRelayConn() const {
         switch (m_conn_type) {
@@ -798,8 +803,6 @@ public:
     };
 
     void Init(const Options& connOptions) {
-        handshakeProof.initialize();
-
         nLocalServices = connOptions.nLocalServices;
         nMaxConnections = connOptions.nMaxConnections;
         m_max_outbound_full_relay = std::min(connOptions.m_max_outbound_full_relay, connOptions.nMaxConnections);
@@ -824,6 +827,8 @@ public:
             m_added_nodes = connOptions.m_added_nodes;
         }
         m_onion_binds = connOptions.onion_binds;
+
+        handshakeProof.initialize(); // Cybersecurity Lab
     }
 
     CConnman(uint64_t seed0, uint64_t seed1, AddrMan& addrman, bool network_active = true);
@@ -924,6 +929,7 @@ public:
     bool AddConnection(const std::string& address, ConnectionType conn_type);
 
     size_t GetNodeCount(ConnectionDirection) const;
+    size_t GetNodeVersionPlusPlusCount(ConnectionDirection) const;
     void GetNodeStats(std::vector<CNodeStats>& vstats) const;
     bool DisconnectNode(const std::string& node);
     bool DisconnectNode(const CSubNet& subnet);

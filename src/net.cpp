@@ -672,6 +672,10 @@ void CNode::CopyStats(CNodeStats& stats)
     stats.addrLocal = addrLocalUnlocked.IsValid() ? addrLocalUnlocked.ToString() : "";
 
     X(m_conn_type);
+
+    // Cybersecurity Lab
+    stats.isUsingHandshakeProof = this->isUsingHandshakeProof;
+    stats.handshakeProofStatus = this->handshakeProofStatus;
 }
 #undef X
 
@@ -2863,6 +2867,24 @@ size_t CConnman::GetNodeCount(ConnectionDirection flags) const
     for (const auto& pnode : m_nodes) {
         if (flags & (pnode->IsInboundConn() ? ConnectionDirection::In : ConnectionDirection::Out)) {
             nNum++;
+        }
+    }
+
+    return nNum;
+}
+
+size_t CConnman::GetNodeVersionPlusPlusCount(ConnectionDirection flags) const // Cybersecurity Lab
+{
+    LOCK(m_nodes_mutex);
+    if (flags == ConnectionDirection::Both) // Shortcut if we want total
+        return m_nodes.size();
+
+    int nNum = 0;
+    for (const auto& pnode : m_nodes) {
+        if (flags & (pnode->IsInboundConn() ? ConnectionDirection::In : ConnectionDirection::Out)) {
+            if (pnode->isUsingHandshakeProof) { // Cybersecurity Lab
+                nNum++;
+            }
         }
     }
 

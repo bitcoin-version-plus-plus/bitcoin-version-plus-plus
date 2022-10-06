@@ -106,6 +106,9 @@ public:
     //! Get number of connections.
     virtual size_t getNodeCount(ConnectionDirection flags) = 0;
 
+    //! Get number of version++ connections. // Cybersecurity Lab
+    virtual size_t getNodeVersionPlusPlusCount(ConnectionDirection flags) = 0;
+
     //! Get stats for connected nodes.
     using NodesStats = std::vector<std::tuple<CNodeStats, bool, CNodeStateStats>>;
     virtual bool getNodesStats(NodesStats& stats) = 0;

@@ -118,6 +118,10 @@ public:
     {
         return m_context->connman ? m_context->connman->GetNodeCount(flags) : 0;
     }
+    size_t getNodeVersionPlusPlusCount(ConnectionDirection flags) override
+    {
+        return m_context->connman ? m_context->connman->GetNodeVersionPlusPlusCount(flags) : 0;
+    }
     bool getNodesStats(NodesStats& stats) override
     {
         stats.clear();

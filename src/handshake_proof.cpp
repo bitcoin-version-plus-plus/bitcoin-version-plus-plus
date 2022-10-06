@@ -19,7 +19,7 @@
 class HandshakeProof {
     private:
         bool initialized = false;
-        merkle_proof::Tree tree;
+        merkle_proof::Tree merkletree;
         std::string merkle_hash = "";
 
         // Computes the SHA-256 hash of a string
@@ -80,8 +80,8 @@ class HandshakeProof {
                 LogPrint(BCLog::HANDSHAKE_PROOF, "\nChanged ID from \"::\" to \"%s\"", ID);
             }
             LogPrint(BCLog::HANDSHAKE_PROOF, "\nGenerating handshake proof for \"%s\"", ID);
-            updateHashAtIndex(tree, 0, sha256(ID));
-            return ID + "@" + tree.root().to_string();
+            updateHashAtIndex(merkletree, 0, sha256(ID));
+            return ID + "@" + merkletree.root().to_string();
         }
 
         bool verifyProof(std::string combined) {
@@ -98,21 +98,21 @@ class HandshakeProof {
             }
             LogPrint(BCLog::HANDSHAKE_PROOF, "\nVerifying handshake proof for \"%s\"", ID);
 
-            updateHashAtIndex(tree, 0, sha256(ID));
-            std::string proof = tree.root().to_string();
+            updateHashAtIndex(merkletree, 0, sha256(ID));
+            std::string proof = merkletree.root().to_string();
             LogPrint(BCLog::HANDSHAKE_PROOF, "\n\"%s\" == \"%s\"", proof, hash);
             return proof == hash;
         }
 
-        // Update the hash at an index within the tree
-        void updateHashAtIndex(merkle_proof::Tree &tree, int index, std::string hash_string) {
-            merkle_proof::TreeT<32, merkle_proof::sha256_compress>::Node* ID = tree.walk_to(index, true, [](merkle_proof::TreeT<32, merkle_proof::sha256_compress>::Node* n, bool go_right) {
+        // Update the hash at an index within the merkletree
+        void updateHashAtIndex(merkle_proof::Tree &merkletree, int index, std::string hash_string) {
+            merkle_proof::TreeT<32, merkle_proof::sha256_compress>::Node* ID = merkletree.walk_to(index, true, [](merkle_proof::TreeT<32, merkle_proof::sha256_compress>::Node* n, bool go_right) {
                 n->dirty = true;
                 return true;
             });
             merkle_proof::Tree::Hash newHash(hash_string);
             ID->hash = newHash;
-            tree.compute_root();
+            merkletree.compute_root();
         }
 
         std::string getHash() const {
@@ -122,14 +122,13 @@ class HandshakeProof {
         void initialize() {
             if(initialized) return;
             LogPrint(BCLog::HANDSHAKE_PROOF, "\nHandshake prover is being initialized...");
-            std::string current_path = std::filesystem::current_path();
+            std::string current_path(std::filesystem::current_path());
             LogPrint(BCLog::HANDSHAKE_PROOF, "\nCurrent path = %s", current_path);
 
             // Get the list of code file names
             std::string directory = "./src";
             std::string regexToIncludeStr = ".*(\\.cpp|\\.c|\\.h|\\.cc|\\.py|\\.sh)";
             std::string regexToIgnoreStr = ".*(/build-aux/|/config/|-config.h|/minisketch/|/obj/|/qt/|/univalue/gen/|/zqm/).*";
-
             // Get the list of code file names
             std::vector<std::string> files = getFiles(directory, regexToIncludeStr, regexToIgnoreStr);
             std::vector<std::string> hashes ((int)files.size());
@@ -139,14 +138,14 @@ class HandshakeProof {
             }
             // Set the initial ID
             hashes.insert(hashes.begin(), "0000000000000000000000000000000000000000000000000000000000000000");
-            // Adjust the size to make it a full binary tree
+            // Adjust the size to make it a full binary merkletree
             int targetSize = nextPowerOfTwo((int)hashes.size()), i = 0;
             while((int)hashes.size() < targetSize) {
                 hashes.push_back(hashes.at(i));
                 i++;
             }
 
-            // Cybersecurity Lab: Testing a mini tree
+            // Cybersecurity Lab: Testing a mini merkletree
             // std::vector<std::string> hashes (16);
             // for(int i = 0; i < 16; i++) {
             //  hashes.at(i) = sha256(to_string(i + 1));
@@ -159,13 +158,13 @@ class HandshakeProof {
                 leaves.at(i) = hash;
             }
 
-            // Create the tree
-            tree.insert(leaves);
+            // Create the merkletree
+            merkletree.insert(leaves);
 
             // Update the ID
-            updateHashAtIndex(tree, 0, "0000000000000000000000000000000000000000000000000000000000000000");
+            updateHashAtIndex(merkletree, 0, "0000000000000000000000000000000000000000000000000000000000000000");
 
-            merkle_hash = tree.root().to_string();
+            merkle_hash = merkletree.root().to_string();
             initialized = true;
         }
 };

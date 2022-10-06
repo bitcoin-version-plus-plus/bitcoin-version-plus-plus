@@ -955,7 +955,9 @@ void RPCConsole::message(int category, const QString &message, bool html)
 
 void RPCConsole::updateNetworkState()
 {
-    QString connections = QString::number(clientModel->getNumConnections()) + " (";
+    QString connections = QString::number(clientModel->getNumConnections());
+    QString connectionsUsingVersionPlusPlus = QString::number(clientModel->getNumVersionPlusPlusConnections()) + " / " + connections; // Cybersecurity Lab
+    connections += " (";
     connections += tr("In:") + " " + QString::number(clientModel->getNumConnections(CONNECTIONS_IN)) + " / ";
     connections += tr("Out:") + " " + QString::number(clientModel->getNumConnections(CONNECTIONS_OUT)) + ")";
 
@@ -964,6 +966,7 @@ void RPCConsole::updateNetworkState()
     }
 
     ui->numberOfConnections->setText(connections);
+    ui->numberOfVersionPlusPlusConns->setText(connectionsUsingVersionPlusPlus); // Cybersecurity Lab
 }
 
 void RPCConsole::setNumConnections(int count)
@@ -1175,6 +1178,7 @@ void RPCConsole::updateDetailWidget()
     if (bip152_hb_settings.isEmpty()) bip152_hb_settings = ts.no;
     ui->peerHighBandwidth->setText(bip152_hb_settings);
     const auto time_now{GetTime<std::chrono::seconds>()};
+    ui->peerUsingPersionPlusPlus->setText(QString::fromStdString(stats->nodeStats.handshakeProofStatus)); // Cybersecurity Lab
     ui->peerConnTime->setText(GUIUtil::formatDurationStr(time_now - stats->nodeStats.m_connected));
     ui->peerLastBlock->setText(TimeDurationField(time_now, stats->nodeStats.m_last_block_time));
     ui->peerLastTx->setText(TimeDurationField(time_now, stats->nodeStats.m_last_tx_time));

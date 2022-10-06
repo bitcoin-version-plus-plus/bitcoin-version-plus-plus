@@ -2649,14 +2649,18 @@ void PeerManagerImpl::ProcessMessage(CNode& pfrom, const std::string& msg_type, 
             bool success = m_connman.handshakeProof.verifyProof(cleanHash); // Cybersecurity Lab
             LogPrint(BCLog::HANDSHAKE_PROOF, "\nVERSION HASH = %s, SUCCESS = %s\n", cleanHash, success ? "TRUE" : "FALSE");
             // bool success = true;
+            pfrom.handshakeProofStatus = "Success";
 
             if(!success) {
-                LogPrint(BCLog::HANDSHAKE_PROOF, "Invalid proof, disconnecting");
+                pfrom.handshakeProofStatus = "Failed";
+                LogPrint(BCLog::HANDSHAKE_PROOF, "Invalid proof");
+                // TODO: Comment out:
                 pfrom.fDisconnect = true;
                 return;
             }
         } else {
             pfrom.isUsingHandshakeProof = false;
+            pfrom.handshakeProofStatus = "Unsupported";
             LogPrint(BCLog::HANDSHAKE_PROOF, "\nVERSION USING DEFAULT SCHEME\n");
         }
 
