@@ -2875,11 +2875,17 @@ size_t CConnman::GetNodeCount(ConnectionDirection flags) const
 
 size_t CConnman::GetNodeVersionPlusPlusCount(ConnectionDirection flags) const // Cybersecurity Lab
 {
-    LOCK(m_nodes_mutex);
-    if (flags == ConnectionDirection::Both) // Shortcut if we want total
-        return m_nodes.size();
-
+    LOCK(m_nodes_mutex); // Grants exclusive access to m_nodes variable
     int nNum = 0;
+    if (flags == ConnectionDirection::Both) { // Cybersecurity Lab
+        for (const auto& pnode : m_nodes) {
+            if (pnode->isUsingHandshakeProof) {
+                nNum++;
+            }
+        }
+        return nNum;
+    }
+
     for (const auto& pnode : m_nodes) {
         if (flags & (pnode->IsInboundConn() ? ConnectionDirection::In : ConnectionDirection::Out)) {
             if (pnode->isUsingHandshakeProof) { // Cybersecurity Lab
