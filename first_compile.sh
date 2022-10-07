@@ -6,7 +6,7 @@ sudo apt-get -y install build-essential libtool autotools-dev automake pkg-confi
 sudo apt-get -y install libssl-dev libevent-dev libboost-all-dev
 
 # GUI dependencies
-#sudo apt-get -y install qttools5-dev qttools5-dev-tools
+sudo apt-get -y install qttools5-dev qttools5-dev-tools
 sudo apt-get -y install libqt5gui5 libqt5core5a libqt5dbus5 libprotobuf-dev protobuf-compiler
 sudo apt-get -y install libqrencode-dev
 
