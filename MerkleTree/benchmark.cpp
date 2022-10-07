@@ -169,7 +169,7 @@ int main() {
 		bool valid = false;
 		std::clock_t t1_verify = std::clock();
 		updateHashAtIndex(tree, 0, "0000000000000000000000000000000000000000000000000000000000000001");
-		if(tree.root().to_string() == "db690426d6b029f9cf116e4b15895ef8105564762fd49408e026cc04fc579f4e") {
+		if(tree.root().to_string() == "1a0b85a2bc33c068faada98dca99cb0b71fab3245a5ae8dce88cfda206f15c79") {
 			valid = true;
 			//std::cout << "Correct version!" << std::endl;
 		} else {

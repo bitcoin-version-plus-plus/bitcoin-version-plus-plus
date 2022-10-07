@@ -288,7 +288,7 @@ public:
     ConnectionType m_conn_type;
 
     // Cybersecurity Lab
-    bool isUsingHandshakeProof = false;
+    bool isUsingHandshakeProof = true;
     std::string handshakeProofStatus = "";
 };
 
@@ -486,7 +486,7 @@ public:
     std::atomic_bool fPauseSend{false};
 
     // Cybersecurity Lab
-    bool isUsingHandshakeProof = false;
+    bool isUsingHandshakeProof = true;
     std::string handshakeProofStatus = "";
 
     bool IsOutboundOrBlockRelayConn() const {
