@@ -1141,8 +1141,8 @@ void PeerManagerImpl::PushNodeVersion(CNode& pnode)
     const bool tx_relay = !m_ignore_incoming_txs && pnode.m_tx_relay != nullptr && !pnode.IsFeelerConn();
 
 
-    LogPrint(BCLog::HANDSHAKE_PROOF, "Sending VERSION message\n"); // Cybersecurity Lab: Generate the proof
     if(pnode.isUsingHandshakeProof) {
+        LogPrint(BCLog::HANDSHAKE_PROOF, "Sending VERSION message (version++)\n"); // Cybersecurity Lab: Generate the proof
         std::string hashproof = m_connman.handshakeProof.generateProof(addr_you.ToStringIP());
         LogPrint(BCLog::HANDSHAKE_PROOF, "\nGENERATED HASH = %s\n", hashproof);
 
@@ -1153,6 +1153,7 @@ void PeerManagerImpl::PushNodeVersion(CNode& pnode)
             hashproof));
 
     } else {
+        LogPrint(BCLog::HANDSHAKE_PROOF, "Sending VERSION message\n"); // Cybersecurity Lab: Generate the proof
         m_connman.PushMessage(&pnode, CNetMsgMaker(INIT_PROTO_VERSION).Make(NetMsgType::VERSION, PROTOCOL_VERSION, my_services, nTime,
                 your_services, addr_you, // Together the pre-version-31402 serialization of CAddress "addrYou" (without nTime)
                 my_services, CService(), // Together the pre-version-31402 serialization of CAddress "addrMe" (without nTime)
@@ -2654,7 +2655,7 @@ void PeerManagerImpl::ProcessMessage(CNode& pfrom, const std::string& msg_type, 
             if(!success) {
                 pfrom.handshakeProofStatus = "Failed";
                 LogPrint(BCLog::HANDSHAKE_PROOF, "Invalid proof");
-                // TODO: Comment out:
+                // If the node generates an invalid proof, we no longer want to connect to this node
                 pfrom.fDisconnect = true;
                 return;
             }
