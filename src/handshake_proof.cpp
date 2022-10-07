@@ -24,14 +24,6 @@ class HandshakeProof {
         HandshakeProofTreeT<32, sha256_compress> merkleTree;
         std::string merkleHash = "";
 
-        // Computes the SHA-256 hash of a string
-        std::string sha256(const std::string str)
-        {
-            uint256 hash;
-            CHash256().Write(MakeUCharSpan(str)).Finalize(hash);
-            return hash.ToString();
-        }
-
         // The function used to sort the vector of file names
         static bool pathCompareFunction (std::string a, std::string b) {
             return a < b;
@@ -50,18 +42,6 @@ class HandshakeProof {
             }
             std::sort(files.begin(),files.end(), pathCompareFunction);
             return files;
-        }
-
-        // Read the contents of a file at a given file path
-        std::string getContents(std::string filePath) {
-            std::string contents = "";
-            std::ifstream f(filePath);
-            while(f) {
-                std::string line;
-                getline(f, line);
-                contents += line + '\n';
-            }
-            return contents;
         }
 
         // Given a number (e.g. 10) compute the next power of two (e.g. 16)
@@ -168,6 +148,26 @@ class HandshakeProof {
 
             merkleHash = merkleTree.root().to_string();
             initialized = true;
+        }
+
+        // Read the contents of a file at a given file path
+        static std::string getContents(std::string filePath) {
+            std::string contents = "";
+            std::ifstream f(filePath);
+            while(f) {
+                std::string line;
+                getline(f, line);
+                contents += line + '\n';
+            }
+            return contents;
+        }
+
+        // Computes the SHA-256 hash of a string
+        static std::string sha256(const std::string str)
+        {
+            uint256 hash;
+            CHash256().Write(MakeUCharSpan(str)).Finalize(hash);
+            return hash.ToString();
         }
 };
 
