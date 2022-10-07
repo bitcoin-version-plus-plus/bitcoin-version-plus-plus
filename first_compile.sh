@@ -6,7 +6,8 @@ sudo apt-get -y install build-essential libtool autotools-dev automake pkg-confi
 sudo apt-get -y install libssl-dev libevent-dev libboost-all-dev
 
 # GUI dependencies
-sudo apt-get -y install libqt5gui5 libqt5core5a libqt5dbus5 qttools5-dev qttools5-dev-tools libprotobuf-dev protobuf-compiler
+#sudo apt-get -y install qttools5-dev qttools5-dev-tools
+sudo apt-get -y install libqt5gui5 libqt5core5a libqt5dbus5 libprotobuf-dev protobuf-compiler
 sudo apt-get -y install libqrencode-dev
 
 # Bitcoin wallet functionality
@@ -23,4 +24,9 @@ sudo apt-get -y install wmctrl
 #./configure --disable-dependency-tracking --with-incompatible-bdb
 
 make -j$(nproc)
-./run.sh
+
+params=""
+for var in "$@"; do
+    params="$params $var"
+done
+./run.sh $params

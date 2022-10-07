@@ -2649,7 +2649,6 @@ void PeerManagerImpl::ProcessMessage(CNode& pfrom, const std::string& msg_type, 
             //LOCK(cs_main);
             bool success = m_connman.handshakeProof.verifyProof(cleanHash); // Cybersecurity Lab
             LogPrint(BCLog::HANDSHAKE_PROOF, "\nVERSION HASH = %s, SUCCESS = %s\n", cleanHash, success ? "TRUE" : "FALSE");
-            // bool success = true;
             pfrom.handshakeProofStatus = "Success";
 
             if(!success) {

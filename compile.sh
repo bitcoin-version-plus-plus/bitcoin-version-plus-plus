@@ -3,4 +3,9 @@
 #rm -rf src/bitcoin-cli
 
 make -j$(nproc)
-./run.sh
+
+params=""
+for var in "$@"; do
+    params="$params $var"
+done
+./run.sh $params
