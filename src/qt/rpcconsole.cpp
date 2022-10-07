@@ -955,9 +955,8 @@ void RPCConsole::message(int category, const QString &message, bool html)
 
 void RPCConsole::updateNetworkState()
 {
-    QString connections = QString::number(clientModel->getNumConnections());
-    QString connectionsUsingVersionPlusPlus = QString::number(clientModel->getNumVersionPlusPlusConnections()) + " / " + connections; // Cybersecurity Lab
-    connections += " (";
+    int numConnections = clientModel->getNumConnections();
+    QString connections = QString::number(numConnections) + " (";
     connections += tr("In:") + " " + QString::number(clientModel->getNumConnections(CONNECTIONS_IN)) + " / ";
     connections += tr("Out:") + " " + QString::number(clientModel->getNumConnections(CONNECTIONS_OUT)) + ")";
 
@@ -966,7 +965,9 @@ void RPCConsole::updateNetworkState()
     }
 
     ui->numberOfConnections->setText(connections);
-    ui->numberOfVersionPlusPlusConns->setText(connectionsUsingVersionPlusPlus); // Cybersecurity Lab
+    ui->numberOfVersionPlusPlusConns->setMinimum(0);
+    ui->numberOfVersionPlusPlusConns->setMaximum(numConnections);
+    ui->numberOfVersionPlusPlusConns->setValue(clientModel->getNumVersionPlusPlusConnections()); // Cybersecurity Lab
 }
 
 void RPCConsole::setNumConnections(int count)

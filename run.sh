@@ -1,7 +1,7 @@
 #!/bin/bash
 # ./run.sh
-# ./run.sh gui
-# ./run.sh gui -debug=handshakeproof
+# ./run.sh nogui
+# ./run.sh nogui -debug=handshakeproof
 
 params=""
 if [[ $1 == -* ]] ; then
@@ -100,7 +100,7 @@ if [ ! -f "$dir/bitcoin.conf" ] ; then #| [ port != 8333 ] ; then
 	echo "listen=1" >> "$dir/bitcoin.conf"
 fi
 
-if [ "$1" == "gui" ] ; then
+if [ "$1" != "nogui" ] ; then
 	if [ "$pruned" == "true" ] ; then
 		echo "Pruned mode activated, only keeping 550 block transactions"
 		echo
