@@ -936,6 +936,7 @@ void RPCConsole::clear(bool keep_prompt)
 #endif
     ui->messagesWidget->document()->setDefaultStyleSheet(
         QString(
+                "::selection { background: #FCAF3E; }" // Cybersecurity Lab: Change selection color
                 "table { }"
                 "td.time { color: #808080; font-size: %2; padding-top: 3px; } "
                 "td.message { font-family: %1; font-size: %2; white-space:pre-wrap; } "
