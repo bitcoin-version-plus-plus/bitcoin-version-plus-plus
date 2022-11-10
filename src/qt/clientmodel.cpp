@@ -89,6 +89,20 @@ int ClientModel::getNumConnections(unsigned int flags) const
     return m_node.getNodeCount(connections);
 }
 
+int ClientModel::getNumVersionPlusPlusConnections(unsigned int flags) const
+{
+    ConnectionDirection connections = ConnectionDirection::None;
+
+    if(flags == CONNECTIONS_IN)
+        connections = ConnectionDirection::In;
+    else if (flags == CONNECTIONS_OUT)
+        connections = ConnectionDirection::Out;
+    else if (flags == CONNECTIONS_ALL)
+        connections = ConnectionDirection::Both;
+
+    return m_node.getNodeVersionPlusPlusCount(connections);
+}
+
 int ClientModel::getHeaderTipHeight() const
 {
     if (cachedBestHeaderHeight == -1) {

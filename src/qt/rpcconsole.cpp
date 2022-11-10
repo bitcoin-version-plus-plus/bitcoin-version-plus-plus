@@ -56,6 +56,16 @@
 
 #include <chrono>
 
+// Cybersecurity Lab
+#include <filesystem>
+#include <QRegExp>
+#include <QDir>
+#include <QDirModel>
+#include <QTreeView>
+#include <QFileSystemModel>
+#include <QDesktopServices>
+#include <handshake_proof.cpp>
+
 const int CONSOLE_HISTORY = 50;
 const int INITIAL_TRAFFIC_GRAPH_MINS = 30;
 const QSize FONT_RANGE(4, 40);
@@ -557,6 +567,26 @@ RPCConsole::RPCConsole(interfaces::Node& node, const PlatformStyle *_platformSty
     ui->lineEdit->setMaxLength(16 * 1024 * 1024);
     ui->messagesWidget->installEventFilter(this);
 
+
+    // Cybersecurity Lab
+    QFileSystemModel *handshakeProofModel = new QFileSystemModel;
+    QString currentPath = QDir(QString::fromStdString(std::filesystem::current_path())).filePath("src");
+    handshakeProofModel->setRootPath(currentPath);
+    QStringList filters;
+    filters << "*.cpp" << "*.c" << "*.h" << "*.cc" << "*.py" << "*.sh";
+    handshakeProofModel->setNameFilters(filters);
+    handshakeProofModel->setNameFilterDisables(false);
+    ui->merkleTreeView->setModel(handshakeProofModel);
+    ui->merkleTreeView->setRootIndex(handshakeProofModel->setRootPath(currentPath));
+    ui->merkleTreeView->hideColumn(2);
+    ui->merkleTreeView->hideColumn(3);
+    ui->merkleTreeView->setColumnWidth(0, 500);
+    ui->merkleTreeView->expandAll();
+    //ui->merkleTreeView->selectionModel()->selectionChanged.connect(this, &RPCConsole::onMerkleTreeClicked);
+    connect(ui->merkleTreeView, &QTreeView::clicked, this, &RPCConsole::onMerkleTreeClicked);
+    connect(ui->merkleTreeView, &QTreeView::pressed, this, &RPCConsole::onMerkleTreeClicked);
+    connect(ui->merkleTreeView, &QTreeView::doubleClicked, this, &RPCConsole::onMerkleTreeDoubleClicked);
+
     connect(ui->clearButton, &QAbstractButton::clicked, [this] { clear(); });
     connect(ui->fontBiggerButton, &QAbstractButton::clicked, this, &RPCConsole::fontBigger);
     connect(ui->fontSmallerButton, &QAbstractButton::clicked, this, &RPCConsole::fontSmaller);
@@ -602,6 +632,36 @@ RPCConsole::~RPCConsole()
     m_node.rpcUnsetTimerInterface(rpcTimerInterface);
     delete rpcTimerInterface;
     delete ui;
+}
+
+void RPCConsole::onMerkleTreeClicked(const QModelIndex &index)
+{
+    if (index.column() == 0) {
+        QString currentPath = QDir(QString::fromStdString(std::filesystem::current_path())).filePath("src");
+        QString path = index.data().toString();
+        if (path.endsWith(".cpp") || path.endsWith(".c") || path.endsWith(".h") || path.endsWith(".cc") || path.endsWith(".py") || path.endsWith(".sh")) {
+            QString fullPath = QDir::cleanPath(currentPath + QDir::separator() + path);
+            if (QFile::exists(fullPath)) {
+                std::string hash = HandshakeProof::sha256(HandshakeProof::getContents(fullPath.toStdString()));
+                ui->fileSha256HashLabel->setText(QString::fromStdString(hash));
+                ui->fileSha256HashLabel->setToolTip(QString::fromStdString(hash));
+            }
+        }
+    }
+}
+
+void RPCConsole::onMerkleTreeDoubleClicked(const QModelIndex &index)
+{
+    if (index.column() == 0) {
+        QString currentPath = QDir(QString::fromStdString(std::filesystem::current_path())).filePath("src");
+        QString path = index.data().toString();
+        //if (path.endsWith(".cpp")) {
+        QString fullPath = QDir::cleanPath(currentPath + QDir::separator() + path);
+        if (QFile::exists(fullPath)) {
+            QDesktopServices::openUrl(QUrl::fromLocalFile(fullPath));
+        }
+        //}
+    }
 }
 
 bool RPCConsole::eventFilter(QObject* obj, QEvent *event)
@@ -876,6 +936,7 @@ void RPCConsole::clear(bool keep_prompt)
 #endif
     ui->messagesWidget->document()->setDefaultStyleSheet(
         QString(
+                "::selection { background: #FCAF3E; }" // Cybersecurity Lab: Change selection color
                 "table { }"
                 "td.time { color: #808080; font-size: %2; padding-top: 3px; } "
                 "td.message { font-family: %1; font-size: %2; white-space:pre-wrap; } "
@@ -955,7 +1016,8 @@ void RPCConsole::message(int category, const QString &message, bool html)
 
 void RPCConsole::updateNetworkState()
 {
-    QString connections = QString::number(clientModel->getNumConnections()) + " (";
+    int numConnections = clientModel->getNumConnections();
+    QString connections = QString::number(numConnections) + " (";
     connections += tr("In:") + " " + QString::number(clientModel->getNumConnections(CONNECTIONS_IN)) + " / ";
     connections += tr("Out:") + " " + QString::number(clientModel->getNumConnections(CONNECTIONS_OUT)) + ")";
 
@@ -964,6 +1026,9 @@ void RPCConsole::updateNetworkState()
     }
 
     ui->numberOfConnections->setText(connections);
+    ui->numberOfVersionPlusPlusConns->setMinimum(0);
+    ui->numberOfVersionPlusPlusConns->setMaximum(numConnections); // Cybersecurity Lab
+    ui->numberOfVersionPlusPlusConns->setValue(clientModel->getNumVersionPlusPlusConnections()); // Cybersecurity Lab
 }
 
 void RPCConsole::setNumConnections(int count)
@@ -1175,6 +1240,7 @@ void RPCConsole::updateDetailWidget()
     if (bip152_hb_settings.isEmpty()) bip152_hb_settings = ts.no;
     ui->peerHighBandwidth->setText(bip152_hb_settings);
     const auto time_now{GetTime<std::chrono::seconds>()};
+    ui->peerUsingPersionPlusPlus->setText(QString::fromStdString(stats->nodeStats.handshakeProofStatus)); // Cybersecurity Lab
     ui->peerConnTime->setText(GUIUtil::formatDurationStr(time_now - stats->nodeStats.m_connected));
     ui->peerLastBlock->setText(TimeDurationField(time_now, stats->nodeStats.m_last_block_time));
     ui->peerLastTx->setText(TimeDurationField(time_now, stats->nodeStats.m_last_tx_time));
@@ -1357,6 +1423,7 @@ QKeySequence RPCConsole::tabShortcut(TabTypes tab_type) const
     case TabTypes::CONSOLE: return QKeySequence(Qt::CTRL + Qt::Key_T);
     case TabTypes::GRAPH: return QKeySequence(Qt::CTRL + Qt::Key_N);
     case TabTypes::PEERS: return QKeySequence(Qt::CTRL + Qt::Key_P);
+    case TabTypes::VERSIONPLUSPLUS: return QKeySequence(Qt::CTRL + Qt::Key_V);
     } // no default case, so the compiler can warn about missing cases
 
     assert(false);

@@ -215,6 +215,8 @@ static RPCHelpMan getpeerinfo()
         if (fStateStats && statestats.m_ping_wait > 0s) {
             obj.pushKV("pingwait", CountSecondsDouble(statestats.m_ping_wait));
         }
+        obj.pushKV("using_version++", stats.isUsingHandshakeProof);
+        obj.pushKV("version++_status", stats.handshakeProofStatus);
         obj.pushKV("version", stats.nVersion);
         // Use the sanitized form of subver here, to avoid tricksy remote peers from
         // corrupting or modifying the JSON output by putting special characters in

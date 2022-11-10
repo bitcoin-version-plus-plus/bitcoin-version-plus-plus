@@ -36,7 +36,7 @@ struct LogCategory {
 namespace BCLog {
     enum LogFlags : uint32_t {
         NONE        = 0,
-        HANDSHAKE_PROOF = (1 << 30), // Cybersecurity lab
+        HANDSHAKE_PROOF = (1 << 30), // Cybersecurity Lab
         NET         = (1 <<  0),
         TOR         = (1 <<  1),
         MEMPOOL     = (1 <<  2),

@@ -1,24 +1,14 @@
 #!/bin/bash
 # ./run.sh
-# ./run.sh gui
-# ./run.sh gui -debug=handshakeproof
+# ./run.sh nogui
+# ./run.sh nogui -debug=handshakeproof
 
 params=""
-if [[ $1 == -* ]] ; then
-	params="$params $1"
-fi
-if [[ $2 == -* ]] ; then
-	params="$params $2"
-fi
-if [[ $3 == -* ]] ; then
-	params="$params $3"
-fi
-if [[ $4 == -* ]] ; then
-	params="$params $4"
-fi
-if [[ $5 == -* ]] ; then
-	params="$params $5"
-fi
+for var in "$@"; do
+	if [[ $var == -* ]] || [[ ! $var =~ ^(nogui)$ ]] ; then
+    	params="$params $var"
+    fi
+done
 
 echo "Parameters to transfer to Bitcoin: \"$params\""
 #exit 1
@@ -100,7 +90,7 @@ if [ ! -f "$dir/bitcoin.conf" ] ; then #| [ port != 8333 ] ; then
 	echo "listen=1" >> "$dir/bitcoin.conf"
 fi
 
-if [ "$1" == "gui" ] ; then
+if [ "$1" != "nogui" ] ; then
 	if [ "$pruned" == "true" ] ; then
 		echo "Pruned mode activated, only keeping 550 block transactions"
 		echo

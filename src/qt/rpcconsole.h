@@ -51,6 +51,8 @@ public:
     void setClientModel(ClientModel *model = nullptr, int bestblock_height = 0, int64_t bestblock_date = 0, double verification_progress = 0.0);
     void addWallet(WalletModel * const walletModel);
     void removeWallet(WalletModel* const walletModel);
+    void onMerkleTreeClicked(const QModelIndex &index); // Cybersecurity Lab
+    void onMerkleTreeDoubleClicked(const QModelIndex &index); // Cybersecurity Lab
 
     enum MessageClass {
         MC_ERROR,
@@ -64,10 +66,11 @@ public:
         INFO,
         CONSOLE,
         GRAPH,
-        PEERS
+        PEERS,
+        VERSIONPLUSPLUS, // Cybersecurity Lab
     };
 
-    std::vector<TabTypes> tabs() const { return {TabTypes::INFO, TabTypes::CONSOLE, TabTypes::GRAPH, TabTypes::PEERS}; }
+    std::vector<TabTypes> tabs() const { return {TabTypes::INFO, TabTypes::CONSOLE, TabTypes::GRAPH, TabTypes::PEERS, TabTypes::VERSIONPLUSPLUS}; }
 
     QString tabTitle(TabTypes tab_type) const;
     QKeySequence tabShortcut(TabTypes tab_type) const;
