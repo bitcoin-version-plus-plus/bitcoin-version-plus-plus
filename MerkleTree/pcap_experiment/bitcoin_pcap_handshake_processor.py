@@ -6,7 +6,7 @@ import sys
 import time
 
 considerTCP = False
-handshakeCutoff = 10000
+handshakeCutoff = 100000
 
 # Given a regular expression, list the files that match it, and ask for user input
 def selectFile(regex, subdirs = False):
