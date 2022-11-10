@@ -4,25 +4,16 @@ import time
 import re
 import readline
 
-
-
 datadir = '' # Virtual machine shared folder
 if os.path.exists('/media/sf_Bitcoin/blocks'):
 	datadir = ' -datadir=/media/sf_Bitcoin' # Virtual machine shared folder
-elif os.path.exists('/media/sf_BitcoinVictim/blocks'):
-	datadir = ' -datadir=/media/sf_BitcoinVictim'
-elif os.path.exists('/media/sf_BitcoinAttacker/blocks'):
-	datadir = ' -datadir=/media/sf_BitcoinAttacker'
-elif os.path.exists(f'/media/{os.getlogin()}/BITCOIN/blocks'):
-	datadir = f' -datadir=/media/{os.getlogin()}/BITCOIN'
-elif os.path.exists(f'/media/{os.getlogin()}/Blockchains/Bitcoin/blocks'):
-	datadir = f' -datadir=/media/{os.getlogin()}/Blockchains/Bitcoin'
-elif os.path.exists(f'/media/{os.getlogin()}/Long Term Storage/Bitcoin/blocks'):
-	datadir = f' -datadir=/media/{os.getlogin()}/Long Term Storage/Bitcoin'
+elif os.path.exists(f'/media/{os.getlogin()}/Bitcoin/blocks'):
+	datadir = f' -datadir=/media/{os.getlogin()}/Bitcoin'
+elif os.path.exists(f'/home/{os.getlogin()}/.bitcoin/blocks'):
+	datadir = f' -datadir=/home/{os.getlogin()}/.bitcoin'
 
 def bitcoin(cmd):
 	return os.popen(f'src/bitcoin-cli{datadir} {cmd}').read()
-
 
 def console(width):
 	os.system('clear')
