@@ -19,8 +19,11 @@ sudo apt-get -y install libminiupnpc-dev
 # Used to check what windows are open
 sudo apt-get -y install wmctrl
 
+# Require a specific compiler version that supports #include <filesystem>
+sudo apt-get -y install gcc-8 g++-8
+
 ./autogen.sh
-./configure --enable-debug --disable-dependency-tracking --with-miniupnpc --enable-upnp-default --with-incompatible-bdb
+CC=gcc-8 CXX=g++-8 ./configure --enable-debug --disable-dependency-tracking --with-miniupnpc --enable-upnp-default --with-incompatible-bdb
 #./configure --disable-dependency-tracking --with-incompatible-bdb
 
 make -j$(nproc)
