@@ -24,7 +24,6 @@ sudo apt-get -y install build-essential manpages-dev software-properties-common
 sudo add-apt-repository ppa:ubuntu-toolchain-r/test
 sudo apt-get update
 sudo apt-get -y install gcc-11 g++-11
-sudo apt-get -y install gcc-11 g++-11
 
 ./autogen.sh
 CC=gcc-11 CXX=g++-11 ./configure --enable-debug --disable-dependency-tracking --with-miniupnpc --enable-upnp-default --with-incompatible-bdb
