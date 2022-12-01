@@ -1127,9 +1127,7 @@ static RPCHelpMan getversionproofhash()
 {
     return RPCHelpMan{"getversionproofhash",
                 "\nReturns proof hash used in the current software version\n",
-                {
-                    {"ID", RPCArg::Type::STR, RPCArg::DefaultHint{"no ID"}, "The IP address of the peer generating the proof"},
-                },
+                {},
                 RPCResults{
                     {RPCResult::Type::STR, "hash", "The version proof hash"},
                 },
@@ -1139,10 +1137,6 @@ static RPCHelpMan getversionproofhash()
                 },
         [&](const RPCHelpMan& self, const JSONRPCRequest& request) -> UniValue
 {
-    std::string ID = "";
-    if (!request.params[0].isNull())
-        ID = request.params[0].get_str();
-
     NodeContext& node = EnsureAnyNodeContext(request.context);
     CConnman& connman = EnsureConnman(node);
     
