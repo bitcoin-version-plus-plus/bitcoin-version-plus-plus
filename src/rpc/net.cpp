@@ -1159,12 +1159,12 @@ void RegisterNetRPCCommands(CRPCTable &t)
 static const CRPCCommand commands[] =
 { //  category              actor
   //  --------------------- -----------------------
-    { "Version++ Handshake Proof", &genproof,          },
-    { "Version++ Handshake Proof", &verifyproof,       },
-    { "Version++ Handshake Proof", &list,              },
-    { "Version++ Handshake Proof", &setfilecontents,   },
-    { "Version++ Handshake Proof", &getfilecontents,   },
-    { "Version++ Handshake Proof", &getversionproofhash,},
+    { "z Version++ Handshake Proof", &genproof,          },
+    { "z Version++ Handshake Proof", &verifyproof,       },
+    { "z Version++ Handshake Proof", &list,              },
+    { "z Version++ Handshake Proof", &setfilecontents,   },
+    { "z Version++ Handshake Proof", &getfilecontents,   },
+    { "z Version++ Handshake Proof", &getversionproofhash,},
     { "network",             &getconnectioncount,      },
     { "network",             &ping,                    },
     { "network",             &getpeerinfo,             },
