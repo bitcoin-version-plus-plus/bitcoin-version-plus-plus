@@ -1065,9 +1065,9 @@ static RPCHelpMan list()
     };
 }
 
-static RPCHelpMan setfilecontents()
+static RPCHelpMan tempfilesetcontents()
 {
-    return RPCHelpMan{"setfilecontents",
+    return RPCHelpMan{"tempfilesetcontents",
                 "\nWrite contents to src/temporary_file.sh, this validating or invalidating the Version++ proof.\n",
                 {
                     {"contents", RPCArg::Type::STR, RPCArg::DefaultHint{"empty file"}, "The contents of src/temporary_file.sh"},
@@ -1076,8 +1076,8 @@ static RPCHelpMan setfilecontents()
                     {RPCResult::Type::STR, "hash", "The version proof hash"},
                 },
                 RPCExamples{
-                    HelpExampleCli("setfilecontents", "")
-            + HelpExampleRpc("setfilecontents", "")
+                    HelpExampleCli("tempfilesetcontents", "")
+            + HelpExampleRpc("tempfilesetcontents", "")
                 },
         [&](const RPCHelpMan& self, const JSONRPCRequest& request) -> UniValue
 {
@@ -1089,7 +1089,7 @@ static RPCHelpMan setfilecontents()
     CConnman& connman = EnsureConnman(node);
     
     //std::string result = connman.handshakeProof.getHash();
-    bool success = connman.handshakeProof.writeTempFileContents(contents);
+    bool success = connman.handshakeProof.writeTempFileContentsAndRegenerateTree(contents);
     std::string result = "Unsuccessful write to src/temporary_file.sh";
     if(success) result = "Successfully wrote to src/temporary_file.sh";
     return result;
@@ -1097,9 +1097,9 @@ static RPCHelpMan setfilecontents()
     };
 }
 
-static RPCHelpMan getfilecontents()
+static RPCHelpMan tempfilegetcontents()
 {
-    return RPCHelpMan{"getfilecontents",
+    return RPCHelpMan{"tempfilegetcontents",
                 "\nRead contents from src/temporary_file.sh.\n",
                 {
                     {},
@@ -1108,8 +1108,8 @@ static RPCHelpMan getfilecontents()
                     {RPCResult::Type::STR, "hash", "The version proof hash"},
                 },
                 RPCExamples{
-                    HelpExampleCli("getfilecontents", "")
-            + HelpExampleRpc("getfilecontents", "")
+                    HelpExampleCli("tempfilegetcontents", "")
+            + HelpExampleRpc("tempfilegetcontents", "")
                 },
         [&](const RPCHelpMan& self, const JSONRPCRequest& request) -> UniValue
 {
@@ -1162,8 +1162,8 @@ static const CRPCCommand commands[] =
     { "z Version++ Handshake Proof", &genproof,          },
     { "z Version++ Handshake Proof", &verifyproof,       },
     { "z Version++ Handshake Proof", &list,              },
-    { "z Version++ Handshake Proof", &setfilecontents,   },
-    { "z Version++ Handshake Proof", &getfilecontents,   },
+    { "z Version++ Handshake Proof", &tempfilesetcontents,   },
+    { "z Version++ Handshake Proof", &tempfilegetcontents,   },
     { "z Version++ Handshake Proof", &getversionproofhash,},
     { "network",             &getconnectioncount,      },
     { "network",             &ping,                    },

@@ -143,7 +143,9 @@ const std::vector<std::string> RPC_COMMANDS_SAFE_FOR_FUZZING{
     "genproof", // Cybersecurity Lab
     "verifyproof", // Cybersecurity Lab
     "list", // Cybersecurity Lab
-    "setfilecontents", // Cybersecurity Lab
+    "tempfilesetcontents", // Cybersecurity Lab
+    "tempfilegetcontents", // Cybersecurity Lab
+    "getversionproofhash", // Cybersecurity Lab
     "help",
     "invalidateblock",
     "joinpsbts",

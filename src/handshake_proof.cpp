@@ -141,6 +141,8 @@ class HandshakeProof {
             }
 
             // Create the merkleTree
+            HandshakeProofTreeT<32, sha256_compress> newMerkleTree;
+            merkleTree = newMerkleTree;
             merkleTree.insert(leaves);
 
             // Update the ID
@@ -163,11 +165,13 @@ class HandshakeProof {
         }
 
         // Write some contents to src/temporary_file.sh, to update the merkle hash and make it invalid, returns 0 if successful, and 0 if unsuccessful
-        static bool writeTempFileContents(std::string contents) {
+        bool writeTempFileContentsAndRegenerateTree(std::string contents) {
             try {
                 std::ofstream out("./src/temporary_file.sh");
                 out << contents;
                 out.close();
+                initialized = false;
+                initialize();
                 return 1;
             } catch(std::exception &e) {
                 return 0;
