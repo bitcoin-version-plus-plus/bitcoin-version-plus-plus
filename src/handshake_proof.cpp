@@ -97,7 +97,7 @@ class HandshakeProof {
             merkleTree.compute_root();
         }
 
-        std::string getHash() const {
+        std::string getHash() {
             return merkleHash;
         }
 
@@ -141,6 +141,8 @@ class HandshakeProof {
             }
 
             // Create the merkleTree
+            HandshakeProofTreeT<32, sha256_compress> newMerkleTree;
+            merkleTree = newMerkleTree;
             merkleTree.insert(leaves);
 
             // Update the ID
@@ -162,9 +164,31 @@ class HandshakeProof {
             return contents;
         }
 
+        // Write some contents to src/temporary_file.sh, to update the merkle hash and make it invalid, returns 0 if successful, and 0 if unsuccessful
+        bool writeTempFileContentsAndRegenerateTree(std::string contents) {
+            try {
+                std::ofstream out("./src/temporary_file.sh");
+                out << contents;
+                out.close();
+                initialized = false;
+                initialize();
+                return 1;
+            } catch(std::exception &e) {
+                return 0;
+            }
+        }
+
+        // Read the contents of src/temporary_file.sh
+        static std::string readTempFileContents() {
+            try {
+                return getContents("./src/temporary_file.sh");
+            } catch(std::exception &e) {
+                return "";
+            }
+        }
+
         // Computes the SHA-256 hash of a string
-        static std::string sha256(const std::string str)
-        {
+        static std::string sha256(const std::string str) {
             uint256 hash;
             CHash256().Write(MakeUCharSpan(str)).Finalize(hash);
             return hash.ToString();

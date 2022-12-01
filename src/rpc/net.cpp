@@ -961,6 +961,168 @@ static RPCHelpMan addpeeraddress()
     };
 }
 
+static RPCHelpMan genproof()
+{
+    return RPCHelpMan{"genproof",
+                "\nGenerate the Version++ proof hash given an ID as input.\n",
+                {
+                    {"ID", RPCArg::Type::STR, RPCArg::DefaultHint{"no ID"}, "The IP address of the peer generating the proof"},
+                },
+                RPCResults{
+                    {RPCResult::Type::STR, "hash", "The version proof hash"},
+                },
+                RPCExamples{
+                    HelpExampleCli("genproof", "")
+            + HelpExampleRpc("genproof", "")
+                },
+        [&](const RPCHelpMan& self, const JSONRPCRequest& request) -> UniValue
+{
+    std::string ID = "";
+    if (!request.params[0].isNull())
+        ID = request.params[0].get_str();
+
+    NodeContext& node = EnsureAnyNodeContext(request.context);
+    CConnman& connman = EnsureConnman(node);
+    
+    //std::string result = connman.handshakeProof.getHash();
+    std::string result = connman.handshakeProof.generateProof(ID);
+    return result;
+},
+    };
+}
+
+static RPCHelpMan verifyproof()
+{
+    return RPCHelpMan{"verifyproof",
+                "\nGiven a proof in ID@HASH format, check if it is valid\n",
+                {
+                    {"proof", RPCArg::Type::STR, RPCArg::Optional::NO, "Proof in the format: ID@HASH format"},
+                },
+                RPCResults{
+                    {RPCResult::Type::BOOL, "valid", "Whether or not the proof is valid"},
+                },
+                RPCExamples{
+                    HelpExampleCli("verifyproof", "")
+            + HelpExampleRpc("verifyproof", "")
+                },
+        [&](const RPCHelpMan& self, const JSONRPCRequest& request) -> UniValue
+{
+    std::string proof = "";
+    if (!request.params[0].isNull())
+        proof = request.params[0].get_str();
+
+    NodeContext& node = EnsureAnyNodeContext(request.context);
+    CConnman& connman = EnsureConnman(node);
+    
+    //std::string result = connman.handshakeProof.getHash();
+    bool result = connman.handshakeProof.verifyProof(proof);
+    return result;
+},
+    };
+}
+
+// Cybersecurity Lab
+static RPCHelpMan list()
+{
+    return RPCHelpMan{"list",
+                "\nReturns proof hash used in the current software version\n",
+                {},
+                RPCResult{
+                    RPCResult::Type::OBJ, "", "",
+                    {
+                        { RPCResult::Type::STR, "address", "Address of the node connection." },
+                        { RPCResult::Type::STR, "handshake_status", "Status of the node's handshake" },
+                    }
+                },
+                RPCExamples{
+                    HelpExampleCli("list", "")
+            + HelpExampleRpc("list", "")
+                },
+        [&](const RPCHelpMan& self, const JSONRPCRequest& request) -> UniValue
+{
+
+    NodeContext& node = EnsureAnyNodeContext(request.context);
+    const CConnman& connman = EnsureConnman(node);
+
+    std::vector<CNodeStats> vstats;
+    connman.GetNodeStats(vstats);
+
+    UniValue result(UniValue::VOBJ);
+    for (const CNodeStats& stats : vstats) {
+        // CNodeStateStats statestats;
+        // bool fStateStats = GetNodeStateStats(stats.nodeid, statestats);
+        // if (!fStateStats) continue;
+        std::string status = stats.handshakeProofStatus;
+        if(status == "Success") status = "Using Version++";
+        else if(status == "Failed") status = "Failed Version++ verification";
+        else if(status == "Unsupported") status = "Using traditional handshake protocol";
+        else status = "Status pending";
+        result.pushKV(stats.m_addr_name, status);
+    }
+
+    return result;
+},
+    };
+}
+
+static RPCHelpMan tempfilesetcontents()
+{
+    return RPCHelpMan{"tempfilesetcontents",
+                "\nWrite contents to src/temporary_file.sh, this validating or invalidating the Version++ proof.\n",
+                {
+                    {"contents", RPCArg::Type::STR, RPCArg::DefaultHint{"empty file"}, "The contents of src/temporary_file.sh"},
+                },
+                RPCResults{
+                    {RPCResult::Type::STR, "hash", "The version proof hash"},
+                },
+                RPCExamples{
+                    HelpExampleCli("tempfilesetcontents", "")
+            + HelpExampleRpc("tempfilesetcontents", "")
+                },
+        [&](const RPCHelpMan& self, const JSONRPCRequest& request) -> UniValue
+{
+    std::string contents = "";
+    if (!request.params[0].isNull())
+        contents = request.params[0].get_str();
+
+    NodeContext& node = EnsureAnyNodeContext(request.context);
+    CConnman& connman = EnsureConnman(node);
+    
+    //std::string result = connman.handshakeProof.getHash();
+    bool success = connman.handshakeProof.writeTempFileContentsAndRegenerateTree(contents);
+    std::string result = "Unsuccessful write to src/temporary_file.sh";
+    if(success) result = "Successfully wrote to src/temporary_file.sh";
+    return result;
+},
+    };
+}
+
+static RPCHelpMan tempfilegetcontents()
+{
+    return RPCHelpMan{"tempfilegetcontents",
+                "\nRead contents from src/temporary_file.sh.\n",
+                {
+                    {},
+                },
+                RPCResults{
+                    {RPCResult::Type::STR, "hash", "The version proof hash"},
+                },
+                RPCExamples{
+                    HelpExampleCli("tempfilegetcontents", "")
+            + HelpExampleRpc("tempfilegetcontents", "")
+                },
+        [&](const RPCHelpMan& self, const JSONRPCRequest& request) -> UniValue
+{
+    NodeContext& node = EnsureAnyNodeContext(request.context);
+    CConnman& connman = EnsureConnman(node);
+    
+    std::string result = connman.handshakeProof.readTempFileContents();
+    return result;
+},
+    };
+}
+
+
 static RPCHelpMan getversionproofhash()
 {
     return RPCHelpMan{"getversionproofhash",
@@ -976,13 +1138,13 @@ static RPCHelpMan getversionproofhash()
         [&](const RPCHelpMan& self, const JSONRPCRequest& request) -> UniValue
 {
     NodeContext& node = EnsureAnyNodeContext(request.context);
-    const CConnman& connman = EnsureConnman(node);
+    CConnman& connman = EnsureConnman(node);
+    
     std::string result = connman.handshakeProof.getHash();
     return result;
 },
     };
 }
-
 
 
 void RegisterNetRPCCommands(CRPCTable &t)
@@ -991,7 +1153,12 @@ void RegisterNetRPCCommands(CRPCTable &t)
 static const CRPCCommand commands[] =
 { //  category              actor
   //  --------------------- -----------------------
-    { "Z Researcher",         &getversionproofhash,     },
+    { "z Version++ Handshake Proof", &genproof,          },
+    { "z Version++ Handshake Proof", &verifyproof,       },
+    { "z Version++ Handshake Proof", &list,              },
+    { "z Version++ Handshake Proof", &tempfilesetcontents,   },
+    { "z Version++ Handshake Proof", &tempfilegetcontents,   },
+    { "z Version++ Handshake Proof", &getversionproofhash,},
     { "network",             &getconnectioncount,      },
     { "network",             &ping,                    },
     { "network",             &getpeerinfo,             },
