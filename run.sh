@@ -94,10 +94,10 @@ if [ "$1" != "nogui" ] ; then
 	if [ "$pruned" == "true" ] ; then
 		echo "Pruned mode activated, only keeping 550 block transactions"
 		echo
-		src/qt/bitcoin-qt -prune=550 -datadir="$dir" $params #-debug=handshakeproof
+		src/qt/bitcoin-qt -prune=550 -datadir="$dir" $params -debug=handshakeproof
 	else
 		echo
-		src/qt/bitcoin-qt -datadir="$dir" $params #-debug=handshakeproof
+		src/qt/bitcoin-qt -datadir="$dir" $params -debug=handshakeproof
 	fi
 else
 

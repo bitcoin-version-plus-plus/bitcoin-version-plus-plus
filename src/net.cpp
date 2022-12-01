@@ -2879,7 +2879,7 @@ size_t CConnman::GetNodeVersionPlusPlusCount(ConnectionDirection flags) const //
     int nNum = 0;
     if (flags == ConnectionDirection::Both) { // Cybersecurity Lab
         for (const auto& pnode : m_nodes) {
-            if (pnode->isUsingHandshakeProof) {
+            if (pnode->isUsingHandshakeProof && pnode->handshakeProofStatus == "Success") {
                 nNum++;
             }
         }
