@@ -3,7 +3,7 @@ import json
 import time
 import subprocess
 
-numSamples = 100
+numSamples = 1000
 
 def bitcoin(cmd):
 	result = os.popen(f'src/bitcoin-cli {cmd}').read()
