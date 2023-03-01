@@ -96,8 +96,8 @@ def run(file):
 			count += 1
 			log(file)
 			if count % 10 == 0:
-				print(f'Logged {count / 2} seconds')
-			time.sleep(0.5)
+				print(f'Logged {count} samples')
+			time.sleep(10)
 	except KeyboardInterrupt:
 		pass
 
