@@ -45,7 +45,7 @@ for i in range(numSamples):
 	if not isBitcoinUp():
 		print('Restarting the node...')
 		terminal('rm -rf ~/.bitcoin/bitcoind.pid')
-		subprocess.Popen(['gnome-terminal -t "Custom Bitcoin Core Instance" -- bash ./run.sh'], shell=True)
+		subprocess.Popen(['gnome-terminal -t "Custom Bitcoin Core Instance" -- bash ./run.sh nogui'], shell=True)
 		time.sleep(10)
 
 	print('Sample number', i + 1)
