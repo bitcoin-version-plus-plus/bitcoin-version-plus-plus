@@ -24,6 +24,13 @@ def winexists(target):
 			return True
 	return False
 
+def isTcpdumpUp():
+	process = terminal('ps -A | grep tcpdump')
+	return process != ''
+
+def startTcpDump():
+	subprocess.Popen(['gnome-terminal -t "Bitcoin TCPDUMP Logger" -- python3 MerkleTree/pcap_experiment/log_bitcoin_pcaps.py'], shell=True)
+
 def connectNode(address = '10.0.2.4'):
 	bitcoin('addnode ' + address + ' onetry')
 
@@ -41,6 +48,8 @@ def getConnectionCount():
 		return 0
 
 for i in range(numSamples):
+	if not isTcpdumpUp():
+		startTcpDump()
 
 	if not isBitcoinUp():
 		print('Restarting the node...')
