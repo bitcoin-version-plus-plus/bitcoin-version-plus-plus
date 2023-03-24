@@ -5,6 +5,8 @@ import subprocess
 import time
 import sys
 
+useConnectConfigurationOnTarget = True
+
 numSamples = 100000
 print(f'Target number of samples: {numSamples}')
 targetNodeAddress = input('Enter target IP address: ')
@@ -46,6 +48,7 @@ def startTcpDump():
 	subprocess.Popen(['gnome-terminal -t "Bitcoin TCPDUMP Logger" -- python3 MerkleTree/pcap_experiment/log_bitcoin_pcaps.py'], shell=True)
 
 def connectNode(address):
+	if useConnectConfigurationOnTarget: return
 	bitcoin('addnode ' + address + ' onetry')
 
 def disconnectNodes():
