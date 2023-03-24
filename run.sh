@@ -18,38 +18,27 @@ if [ ! -d "src" ] ; then
 fi
 
 pruned="false"
-if [ -d "/media/sf_Bitcoin/blocks/" ] && [ ! -f "/media/sf_Bitcoin/bitcoind.pid" ] ; then
-	dir="/media/sf_Bitcoin"
-elif [ -d "/media/sf_BitcoinAttacker/blocks/" ] && [ ! -f "/media/sf_BitcoinAttacker/bitcoind.pid" ] ; then
-	dir="/media/sf_BitcoinAttacker"
-elif [ -d "/media/sf_BitcoinVictim/blocks/" ] && [ ! -f "/media/sf_BitcoinVictim/bitcoind.pid" ] ; then
-	dir="/media/sf_BitcoinVictim"
-elif [ -d "/media/sim/BITCOIN/blocks/" ] && [ ! -f "/media/sim/BITCOIN/bitcoind.pid" ] ; then
-	dir="/media/sim/BITCOIN"
-elif [ -d "/media/ubuntu1/Blockchains/Bitcoin/blocks/" ] && [ ! -f "/media/ubuntu1/Blockchains/Bitcoin/bitcoind.pid" ] ; then
-	dir="/media/ubuntu1/Blockchains/Bitcoin"
 
-# 5k full node
-elif [ -d "/media/research/Long Term Storage/Bitcoin/blocks/" ] && [ ! -f "/media/research/Long Term Storage/Bitcoin/bitcoind.pid" ] ; then
-	dir="/media/research/Long Term Storage/Bitcoin"
-
+if [ -d /media/$USER/sf_Bitcoin/blocks/ ] && [ ! -f /media/sf_Bitcoin/bitcoind.pid ] ; then
+	dir=/media/$USER/sf_Bitcoin
+# Add any other directories here
 
 # For running multiple nodes on the same machine
-elif [ -d "$HOME/.bitcoin/blocks/" ] && [ -f "$HOME/.bitcoin/bitcoind.pid" ] && 
-	 [ -d "$HOME/.bitcoin2/blocks/" ] && [ ! -f "$HOME/.bitcoin2/bitcoind.pid" ] ; then
-	dir="$HOME/.bitcoin2"
-	pruned="true"
-elif [ -d "$HOME/.bitcoin/blocks/" ] && [ -f "$HOME/.bitcoin/bitcoind.pid" ] && 
-	 [ -d "$HOME/.bitcoin2/blocks/" ] && [ -f "$HOME/.bitcoin2/bitcoind.pid" ] && 
-	 [ -d "$HOME/.bitcoin3/blocks/" ] && [ ! -f "$HOME/.bitcoin3/bitcoind.pid" ] ; then
-	dir="$HOME/.bitcoin3"
-	pruned="true"
-elif [ -d "$HOME/.bitcoin/blocks/" ] && [ -f "$HOME/.bitcoin/bitcoind.pid" ] && 
-	 [ -d "$HOME/.bitcoin2/blocks/" ] && [ -f "$HOME/.bitcoin2/bitcoind.pid" ] && 
-	 [ -d "$HOME/.bitcoin3/blocks/" ] && [ -f "$HOME/.bitcoin3/bitcoind.pid" ] && 
-	 [ -d "$HOME/.bitcoin4/blocks/" ] && [ ! -f "$HOME/.bitcoin4/bitcoind.pid" ] ; then
-	dir="$HOME/.bitcoin4"
-	pruned="true"
+elif [ -d $HOME/.bitcoin/blocks/ ] && [ -f $HOME/.bitcoin/bitcoind.pid ] && 
+	 [ -d $HOME/.bitcoin2/blocks/ ] && [ ! -f $HOME/.bitcoin2/bitcoind.pid ] ; then
+	dir=$HOME/.bitcoin2
+	pruned=true
+elif [ -d $HOME/.bitcoin/blocks/ ] && [ -f $HOME/.bitcoin/bitcoind.pid ] && 
+	 [ -d $HOME/.bitcoin2/blocks/ ] && [ -f $HOME/.bitcoin2/bitcoind.pid ] && 
+	 [ -d $HOME/.bitcoin3/blocks/ ] && [ ! -f $HOME/.bitcoin3/bitcoind.pid ] ; then
+	dir=$HOME/.bitcoin3
+	pruned=true
+elif [ -d $HOME/.bitcoin/blocks/ ] && [ -f $HOME/.bitcoin/bitcoind.pid ] && 
+	 [ -d $HOME/.bitcoin2/blocks/ ] && [ -f $HOME/.bitcoin2/bitcoind.pid ] && 
+	 [ -d $HOME/.bitcoin3/blocks/ ] && [ -f $HOME/.bitcoin3/bitcoind.pid ] && 
+	 [ -d $HOME/.bitcoin4/blocks/ ] && [ ! -f $HOME/.bitcoin4/bitcoind.pid ] ; then
+	dir=$HOME/.bitcoin4
+	pruned=true
 
 else
 	dir="$HOME/.bitcoin"
@@ -94,10 +83,10 @@ if [ "$1" != "nogui" ] ; then
 	if [ "$pruned" == "true" ] ; then
 		echo "Pruned mode activated, only keeping 550 block transactions"
 		echo
-		src/qt/bitcoin-qt -prune=550 -datadir="$dir" $params -debug=handshakeproof
+		src/qt/bitcoin-qt -prune=550 -datadir="$dir" $params #-debug=handshakeproof
 	else
 		echo
-		src/qt/bitcoin-qt -datadir="$dir" $params -debug=handshakeproof
+		src/qt/bitcoin-qt -datadir="$dir" $params #-debug=handshakeproof
 	fi
 else
 
