@@ -79,10 +79,8 @@ for i in range(numSamples):
 		connectNode(targetNodeAddress)
 		time.sleep(0.5)
 
-	time.sleep(2)
-
 	while(isBitcoinUp() and getConnectionCount() > 0):
 		disconnectNodes()
 		time.sleep(0.3)
 
-	time.sleep(2)
+	time.sleep(1)

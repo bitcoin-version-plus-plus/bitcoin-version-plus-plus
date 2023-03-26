@@ -1,3 +1,4 @@
+import datetime
 import os
 import pyshark
 import re
@@ -107,18 +108,20 @@ def log(packet):
 	size = packet.length
 
 	tcpLayer = None
-	bitcoinLayer = None
+	bitcoinLayers = []
 	for i, layer in enumerate(packet.layers):
 		if layer._layer_name == 'bitcoin':
-			bitcoinLayer = layer
+			bitcoinLayers.append(layer)
 		elif layer._layer_name == 'tcp':
 			tcpLayer = layer
 
 	command = ''
 	protocol = 'TCP'
-	if bitcoinLayer is not None:
+	if len(bitcoinLayers) > 0:
 		protocol = 'BITCOIN'
-		command = bitcoinLayer.command
+		for layer in bitcoinLayers:
+			command += layer.command + ' '
+	command = command.strip()
 
 	line = f'{timestamp},'
 	line += f'{timestamp_seconds},'

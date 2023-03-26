@@ -88,14 +88,19 @@ def listFiles(regex, directory = ''):
 def header():
 	line = 'Timestamp,'
 	line += 'Timestamp (s),'
-	line += 'Versions duration (s),'
+	line += 'Handshake duration (s),'
 	line += 'Handshake size (B),'
 	line += 'Number of packets,'
 	line += 'Number of TCP packets,'
 	line += 'Number of Bitcoin packets,'
+	line += 'Time of VERSION 1 (s),'
+	line += 'Time of VERSION 2 (s),'
+	line += 'Time of VERACK 1 (s),'
+	line += 'Time of VERACK 2 (s),'
 	line += 'VERSION 1 size (B),'
 	line += 'VERSION 2 size (B),'
-	line += 'Bitcoin messages in handshake,'
+	line += 'VERACK 1 size (B),'
+	line += 'VERACK 2 size (B),'
 	return line
 
 inputFileName = selectFile('.*_parsed\.csv', False)
@@ -118,9 +123,7 @@ handshake_total_tcp_packets = 0
 handshake_total_bitcoin_packets = 0
 handshake_end_timestamp = 0
 handshake_versions = []
-handshake_bitcoin_messages = {}
-veracks_received = 0
-
+handshake_veracks = []
 handshake_count = 0
 
 ip_distribution = {}
@@ -166,22 +169,21 @@ for i, row in enumerate(rows):
 		handshake_tcp_count += 1
 	
 	if protocol == 'BITCOIN':
-		commands = command.split()
-		for c in commands:
-			if c not in handshake_bitcoin_messages:
-				handshake_bitcoin_messages[c] = 1
-			else:
-				handshake_bitcoin_messages[c] += 1
-
-		if 'version' in command:
+		if command == 'version':
 			# If a verack was received, something is off, restart the handshake
-			handshake_versions.append([timestamp_seconds, size, handshake_total_size, handshake_total_packets, handshake_total_tcp_packets, handshake_total_bitcoin_packets, handshake_bitcoin_messages])
+			if len(handshake_veracks) > 0:
+				handshake_versions = []
+
+			handshake_versions.append([timestamp_seconds, size, handshake_total_size, handshake_total_packets, handshake_total_tcp_packets, handshake_total_bitcoin_packets])
 			while len(handshake_versions) > 2: # Only remember the latest two
 				handshake_versions.pop(0)
-			veracks_received = 0
+			handshake_veracks = []
 
-		if 'verack' in command:
-			veracks_received += 1
+		elif command == 'verack':
+			if len(handshake_versions) != 2: continue
+			handshake_veracks.append([timestamp_seconds, size])
+			while len(handshake_veracks) > 2: # Only remember the latest two
+				handshake_veracks.pop(0)
 
 	if len(handshake_versions) > 1: # Handshake has started, so log the data
 		handshake_total_size += size
@@ -189,22 +191,27 @@ for i, row in enumerate(rows):
 		if protocol == 'TCP': handshake_total_tcp_packets += 1
 		else: handshake_total_bitcoin_packets += 1
 
-	if len(handshake_versions) >= 2 and veracks_received >= 2:
-		for c in handshake_versions[0][6]: # Only count when the handshake began
-			handshake_bitcoin_messages[c] -= handshake_versions[0][6][c]
-
-		handshake_bitcoin_messages = dict(sorted(handshake_bitcoin_messages.items(), key=lambda item: item[1], reverse=True))
-
+	if len(handshake_versions) == 2 and len(handshake_veracks) == 2:
+		if i + 1 < len(rows):
+			nextRow = rows[i + 1]
+			handshake_end_timestamp = float(nextRow[1])
+		else:
+			handshake_end_timestamp = handshake_verack_2_timestamp
 		line = f'{timestamp},'
 		line += f'{timestamp_seconds},'
+		line += f'{handshake_end_timestamp - handshake_versions[0][0]},'
+		line += f'{handshake_total_size - handshake_versions[0][2]},'
+		line += f'{handshake_total_packets - handshake_versions[0][3]},'
+		line += f'{handshake_total_tcp_packets - handshake_versions[0][4]},'
+		line += f'{handshake_total_bitcoin_packets - handshake_versions[0][5]},'
+		line += f'{handshake_versions[0][0] - handshake_versions[0][0]},'
 		line += f'{handshake_versions[1][0] - handshake_versions[0][0]},'
-		line += f'{handshake_versions[1][2] - handshake_versions[0][2]},'
-		line += f'{handshake_versions[1][3] - handshake_versions[0][3]},'
-		line += f'{handshake_versions[1][4] - handshake_versions[0][4]},'
-		line += f'{handshake_versions[1][5] - handshake_versions[0][5]},'
+		line += f'{handshake_veracks[0][0] - handshake_versions[0][0]},'
+		line += f'{handshake_veracks[1][0] - handshake_versions[0][0]},'
 		line += f'{handshake_versions[0][1]},'
 		line += f'{handshake_versions[1][1]},'
-		line += f'{handshake_bitcoin_messages},'
+		line += f'{handshake_veracks[0][1]},'
+		line += f'{handshake_veracks[1][1]},'
 		outputFile.write(line + '\n')
 
 		# Reset all the handshake data for the next handshake
@@ -215,8 +222,7 @@ for i, row in enumerate(rows):
 		handshake_total_bitcoin_packets = 0
 		handshake_end_timestamp = 0
 		handshake_versions = []
-		handshake_bitcoin_messages = {}
-		veracks_received = 0
+		handshake_veracks = []
 
 		# Increment the handshake counter
 		handshake_count += 1
