@@ -93,7 +93,7 @@ def header():
 	line += 'Source,'
 	line += 'Destination,'
 	line += 'Packet size (B),'
-	line += 'Bitcoin Message,'
+	line += 'Bitcoin Messages,'
 	return line
 
 def log(packet):

@@ -4,6 +4,8 @@ import re
 import sys
 import time
 
+handshake_cutoff = 45000 # 0 for no cutoff
+
 # Given a regular expression, list the files that match it, and ask for user input
 def selectFile(regex, subdirs = False):
 	files = []
@@ -89,13 +91,28 @@ def header():
 	line = 'Timestamp,'
 	line += 'Timestamp (s),'
 	line += 'Versions duration (s),'
-	line += 'Handshake size (B),'
-	line += 'Number of packets,'
-	line += 'Number of TCP packets,'
-	line += 'Number of Bitcoin packets,'
+	line += 'Versions size (B),'
+	line += 'Versions number of packets,'
+	line += 'Versions number of TCP packets,'
+	line += 'Versions number of Bitcoin packets,'
+	line += 'Versions Bitcoin message distribution,'
+	line += 'Versions probabilities of Bitcoin message,'
+	line += 'Veracks duration (s),'
+	line += 'Veracks size (B),'
+	line += 'Veracks number of packets,'
+	line += 'Veracks number of TCP packets,'
+	line += 'Veracks number of Bitcoin packets,'
+	line += 'Veracks Bitcoin message distribution,'
+	line += 'Veracks probabilities of Bitcoin message,'
+	line += 'SendCMPCTs duration (s),'
+	line += 'SendCMPCTs size (B),'
+	line += 'SendCMPCTs number of packets,'
+	line += 'SendCMPCTs number of TCP packets,'
+	line += 'SendCMPCTs number of Bitcoin packets,'
+	line += 'SendCMPCTs Bitcoin message distribution,'
+	line += 'SendCMPCTs probabilities of Bitcoin message,'
 	line += 'VERSION 1 size (B),'
 	line += 'VERSION 2 size (B),'
-	line += 'Bitcoin messages in handshake,'
 	return line
 
 inputFileName = selectFile('.*_parsed\.csv', False)
@@ -117,9 +134,14 @@ handshake_total_packets = 0
 handshake_total_tcp_packets = 0
 handshake_total_bitcoin_packets = 0
 handshake_end_timestamp = 0
-handshake_versions = []
 handshake_bitcoin_messages = {}
-veracks_received = 0
+versions_bitcoin_message_probabilities = {}
+veracks_bitcoin_message_probabilities = {}
+sendcmpct_bitcoin_message_probabilities = {}
+handshake_versions = []
+handshake_veracks = []
+sendheaders_received = 0
+sendcmpct_received = 0
 
 handshake_count = 0
 
@@ -174,14 +196,23 @@ for i, row in enumerate(rows):
 				handshake_bitcoin_messages[c] += 1
 
 		if 'version' in command:
-			# If a verack was received, something is off, restart the handshake
-			handshake_versions.append([timestamp_seconds, size, handshake_total_size, handshake_total_packets, handshake_total_tcp_packets, handshake_total_bitcoin_packets, handshake_bitcoin_messages])
+			handshake_versions.append([timestamp_seconds, size, handshake_total_size, handshake_total_packets, handshake_total_tcp_packets, handshake_total_bitcoin_packets, handshake_bitcoin_messages.copy()])
 			while len(handshake_versions) > 2: # Only remember the latest two
 				handshake_versions.pop(0)
-			veracks_received = 0
+			handshake_veracks = []
+			sendheaders_received = 0
+			sendcmpct_received = 0
 
 		if 'verack' in command:
-			veracks_received += 1
+			handshake_veracks.append([timestamp_seconds, size, handshake_total_size, handshake_total_packets, handshake_total_tcp_packets, handshake_total_bitcoin_packets, handshake_bitcoin_messages.copy()])
+			while len(handshake_veracks) > 2: # Only remember the latest two
+				handshake_veracks.pop(0)
+
+		if 'sendheaders' in command:
+			sendheaders_received += 1
+
+		if 'sendcmpct' in command:
+			sendcmpct_received += 1
 
 	if len(handshake_versions) > 1: # Handshake has started, so log the data
 		handshake_total_size += size
@@ -189,22 +220,119 @@ for i, row in enumerate(rows):
 		if protocol == 'TCP': handshake_total_tcp_packets += 1
 		else: handshake_total_bitcoin_packets += 1
 
-	if len(handshake_versions) >= 2 and veracks_received >= 2:
-		for c in handshake_versions[0][6]: # Only count when the handshake began
-			handshake_bitcoin_messages[c] -= handshake_versions[0][6][c]
+	handshake_is_complete = False
+	if len(handshake_versions) >= 2 and len(handshake_veracks) >= 2:
+		if i + 1 == len(rows): handshake_is_complete = True
+		elif 'version' in rows[i + 1][6].split(): handshake_is_complete = True
+		elif sendheaders_received >= 2 and sendcmpct_received >= 2: handshake_is_complete = True
 
-		handshake_bitcoin_messages = dict(sorted(handshake_bitcoin_messages.items(), key=lambda item: item[1], reverse=True))
+	if handshake_is_complete:
+		starting_baseline_bitcoin_messages = handshake_versions[0][6].copy()
+		if starting_baseline_bitcoin_messages['version'] > 0:
+			# The initial version should not be subtracted from the total, so remove it early
+			starting_baseline_bitcoin_messages['version'] -= 1
+		version_bitcoin_messages = handshake_versions[1][6]
+		verack_bitcoin_messages = handshake_veracks[1][6]
+		sendcmpct_bitcoin_messages = handshake_bitcoin_messages.copy()
 
+		for c in starting_baseline_bitcoin_messages: # Only count when the handshake began
+			version_bitcoin_messages[c] -= starting_baseline_bitcoin_messages[c]
+			verack_bitcoin_messages[c] -= starting_baseline_bitcoin_messages[c]
+			sendcmpct_bitcoin_messages[c] -= starting_baseline_bitcoin_messages[c]
+
+			if version_bitcoin_messages[c] <= 0: del version_bitcoin_messages[c]
+			if verack_bitcoin_messages[c] <= 0: del verack_bitcoin_messages[c]
+			if sendcmpct_bitcoin_messages[c] <= 0: del sendcmpct_bitcoin_messages[c]
+
+
+		# Construct the message probabilities
+		for c in version_bitcoin_messages:
+			if c not in versions_bitcoin_message_probabilities:
+				versions_bitcoin_message_probabilities[c] = 0
+			versions_bitcoin_message_probabilities[c] += version_bitcoin_messages[c]
+		for c in verack_bitcoin_messages:
+			if c not in veracks_bitcoin_message_probabilities:
+				veracks_bitcoin_message_probabilities[c] = 0
+			veracks_bitcoin_message_probabilities[c] += verack_bitcoin_messages[c]
+		for c in sendcmpct_bitcoin_messages:
+			if c not in sendcmpct_bitcoin_message_probabilities:
+				sendcmpct_bitcoin_message_probabilities[c] = 0
+			sendcmpct_bitcoin_message_probabilities[c] += sendcmpct_bitcoin_messages[c]
+
+		versions_probs = {}
+		veracks_probs = {}
+		sendcmpct_probs = {}
+		for c in versions_bitcoin_message_probabilities:
+			versions_probs[c] = versions_bitcoin_message_probabilities[c] / (handshake_count + 1)
+		for c in veracks_bitcoin_message_probabilities:
+			veracks_probs[c] = veracks_bitcoin_message_probabilities[c] / (handshake_count + 1)
+		for c in sendcmpct_bitcoin_message_probabilities:
+			sendcmpct_probs[c] = sendcmpct_bitcoin_message_probabilities[c] / (handshake_count + 1)
+
+		version_bitcoin_messages = dict(sorted(version_bitcoin_messages.items(), key=lambda item: item[1], reverse=True))
+		verack_bitcoin_messages = dict(sorted(verack_bitcoin_messages.items(), key=lambda item: item[1], reverse=True))
+		sendcmpct_bitcoin_messages = dict(sorted(sendcmpct_bitcoin_messages.items(), key=lambda item: item[1], reverse=True))
+
+		"""
+line = 'Timestamp,'
+line += 'Timestamp (s),'
+line += 'Versions duration (s),'
+line += 'Versions size (B),'
+line += 'Versions number of packets,'
+line += 'Versions number of TCP packets,'
+line += 'Versions number of Bitcoin packets,'
+line += 'Versions Bitcoin message distribution,'
+line += 'Versions probabilities of Bitcoin message,'
+line += 'Veracks duration (s),'
+line += 'Veracks size (B),'
+line += 'Veracks number of packets,'
+line += 'Veracks number of TCP packets,'
+line += 'Veracks number of Bitcoin packets,'
+line += 'Veracks Bitcoin message distribution,'
+line += 'Veracks probabilities of Bitcoin message,'
+line += 'SendCMPCTs duration (s),'
+line += 'SendCMPCTs size (B),'
+line += 'SendCMPCTs number of packets,'
+line += 'SendCMPCTs number of TCP packets,'
+line += 'SendCMPCTs number of Bitcoin packets,'
+line += 'SendCMPCTs Bitcoin message distribution,'
+line += 'SendCMPCTs probabilities of Bitcoin message,'
+line += 'VERSION 1 size (B),'
+line += 'VERSION 2 size (B),'
+		"""
 		line = f'{timestamp},'
 		line += f'{timestamp_seconds},'
-		line += f'{handshake_versions[1][0] - handshake_versions[0][0]},'
-		line += f'{handshake_versions[1][2] - handshake_versions[0][2]},'
-		line += f'{handshake_versions[1][3] - handshake_versions[0][3]},'
-		line += f'{handshake_versions[1][4] - handshake_versions[0][4]},'
-		line += f'{handshake_versions[1][5] - handshake_versions[0][5]},'
+
+		# VERSIONs
+		line += f'{handshake_versions[1][0] - handshake_versions[0][0]},' # Duration (s)
+		line += f'{handshake_versions[1][2] - handshake_versions[0][2]},' # Size (B),
+		line += f'{handshake_versions[1][3] - handshake_versions[0][3]},' # Number of packets
+		line += f'{handshake_versions[1][4] - handshake_versions[0][4]},' # Number of TCP packets
+		line += f'{handshake_versions[1][5] - handshake_versions[0][5]},' # Number of Bitcoin packets
+		line += f'"{version_bitcoin_messages}",' # Bitcoin message distribution
+		line += f'"{versions_probs}",' # Bitcoin message distribution probability
+
+		# VERACKs
+		line += f'{handshake_veracks[1][0] - handshake_versions[0][0]},' # Duration (s)
+		line += f'{handshake_veracks[1][2] - handshake_versions[0][2]},' # Size (B),
+		line += f'{handshake_veracks[1][3] - handshake_versions[0][3]},' # Number of packets
+		line += f'{handshake_veracks[1][4] - handshake_versions[0][4]},' # Number of TCP packets
+		line += f'{handshake_veracks[1][5] - handshake_versions[0][5]},' # Number of Bitcoin packets
+		line += f'"{verack_bitcoin_messages}",' # Bitcoin message distribution
+		line += f'"{veracks_probs}",' # Bitcoin message distribution probability
+
+		# SENDHEADERS / SENDCMPCTs
+		currentState = [timestamp_seconds, size, handshake_total_size, handshake_total_packets, handshake_total_tcp_packets, handshake_total_bitcoin_packets, handshake_bitcoin_messages]
+		line += f'{currentState[0] - handshake_versions[0][0]},' # Duration (s)
+		line += f'{currentState[2] - handshake_versions[0][2]},' # Size (B),
+		line += f'{currentState[3] - handshake_versions[0][3]},' # Number of packets
+		line += f'{currentState[4] - handshake_versions[0][4]},' # Number of TCP packets
+		line += f'{currentState[5] - handshake_versions[0][5]},' # Number of Bitcoin packets
+		line += f'"{sendcmpct_bitcoin_messages}",' # Bitcoin message distribution
+		line += f'"{sendcmpct_probs}",' # Bitcoin message distribution probability
+
 		line += f'{handshake_versions[0][1]},'
 		line += f'{handshake_versions[1][1]},'
-		line += f'{handshake_bitcoin_messages},'
 		outputFile.write(line + '\n')
 
 		# Reset all the handshake data for the next handshake
@@ -214,14 +342,17 @@ for i, row in enumerate(rows):
 		handshake_total_tcp_packets = 0
 		handshake_total_bitcoin_packets = 0
 		handshake_end_timestamp = 0
-		handshake_versions = []
 		handshake_bitcoin_messages = {}
-		veracks_received = 0
+		handshake_versions = []
+		handshake_veracks = []
+		sendheaders_received = 0
+		sendcmpct_received = 0
 
 		# Increment the handshake counter
 		handshake_count += 1
 		if handshake_count % 10 == 0:
 			print('Processing handshake', handshake_count)
+		if handshake_count >= handshake_cutoff: break
 
 print(f'Saved to "{outputFileName}".')
 
