@@ -115,7 +115,7 @@ def header():
 	line += 'VERSION 2 size (B),'
 	return line
 
-inputFileName = selectFile('.*_parsed\.csv', False)
+inputFileName = selectFile('.*_parsed\.csv', True)
 outputFileName = inputFileName[:-5] + '_handshake.csv'
 
 print()

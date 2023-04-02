@@ -133,7 +133,7 @@ def log(packet):
 	return line
 
 
-pcapName = selectFile('.*\.pcap', False)
+pcapName = selectFile('.*\.pcap', True)
 outputFileName = pcapName[:-5] + '_parsed.csv'
 
 if os.path.exists(outputFileName):
